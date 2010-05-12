@@ -7,3 +7,9 @@ hanoitri
 mod17
 mod3tt
 popcountmod3
+tiny-symbol-table
+gmon.out
+callgrind.out.*
+cachegrind.out.*
+nand
+a.out
