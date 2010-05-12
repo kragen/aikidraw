@@ -13,3 +13,4 @@ callgrind.out.*
 cachegrind.out.*
 nand
 a.out
+*.pyc
