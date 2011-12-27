@@ -1,16 +1,28 @@
 // TODO:
 // D draw lines with mouse
+// D fix it so it works in Firefox
 // - store lines in localStorage
 
-var cv = document.getElementById('c')
-  , cx = cv.getContext('2d')
-  , mousePos = null
+var mousePos = null
+  , cx = null
+  , offsetTop = null
+  , offsetLeft = null
 
-cv.addEventListener('mousedown', function(ev) { mousePos = evPos(ev) } )
-cv.addEventListener('mouseup', function() { mousePos = null })
-cv.addEventListener('mousemove', mouseMoveHandler)
+$(function() {
+  var cv = $('#c')
+    , offset = cv.offset()
 
-cx.strokeStyle = '1px solid black'
+  cx = cv[0].getContext('2d')
+  offsetTop = offset.top
+  offsetLeft = offset.left
+
+  cv
+  .mousedown(function(ev) { mousePos = evPos(ev) })
+  .mouseup(function() { mousePos = null })
+  .mousemove(mouseMoveHandler)
+
+  cx.strokeStyle = '1px solid black'
+})
 
 function mouseMoveHandler(ev) {
   if (mousePos === null) {
@@ -27,5 +39,5 @@ function mouseMoveHandler(ev) {
 }
 
 function evPos(ev) {
-  return [ev.offsetX, ev.offsetY]
+  return [ev.pageX - offsetLeft, ev.pageY - offsetTop]
 }
