@@ -5,6 +5,7 @@
 // D namespace everything
 // - add multiple colors
 // - add multiple thicknesses
+// - make lines long enough to be sensibly antialiased
 // - make localStorage memory-efficient
 // - make localStorage linear-time
 
@@ -33,6 +34,11 @@ var capo = { mousePos: null
                if (drawing) {
                  capo.drawing = JSON.parse(drawing)
                  capo.drawing.map(function(line) {
+                   if (!line[0].x) {
+                     line[0] = capo.upgradePoint(line[0])
+                     line[1] = capo.upgradePoint(line[1])
+                   }
+
                    capo.drawLine(line[0], line[1])
                  })
                }
@@ -44,6 +50,14 @@ var capo = { mousePos: null
                }
 
                var newPos = capo.evPos(ev)
+
+               // Very simple front-end drawing simplification: if the
+               // mouse has moved zero or one pixels, that’s not
+               // enough.  Hopefully this is useful and not annoying.
+               if (capo.manhattanDistance(capo.mousePos, newPos) < 2) {
+                 return;
+               }
+
                capo.addLine(capo.mousePos, newPos)
                capo.drawLine(capo.mousePos, newPos)
                capo.mousePos = newPos
@@ -51,8 +65,8 @@ var capo = { mousePos: null
 
            , drawLine: function(oldPos, newPos) {
                var cx = capo.cx
-               cx.moveTo(oldPos[0], oldPos[1])
-               cx.lineTo(newPos[0], newPos[1])
+               cx.moveTo(oldPos.x, oldPos.y)
+               cx.lineTo(newPos.x, newPos.y)
                cx.stroke()
              }
 
@@ -62,7 +76,20 @@ var capo = { mousePos: null
              }
 
            , evPos: function(ev) {
-               return [ev.pageX - capo.offsetLeft, ev.pageY - capo.offsetTop]
+               return { x: ev.pageX - capo.offsetLeft
+                      , y: ev.pageY - capo.offsetTop
+                      }
+             }
+
+           , manhattanDistance: function(a, b) {
+               return (Math.abs(a.x - b.x) +
+                       Math.abs(a.y - b.y))
+             }
+
+             // For drawings created in the first few hours of
+             // development.
+           , upgradePoint: function(point) {
+               return { x: point[0], y: point[1] }
              }
            }
 
