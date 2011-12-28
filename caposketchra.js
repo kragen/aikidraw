@@ -60,9 +60,34 @@ var capo =
         capo.restoreDrawing(localStorage.currentDrawing)
       }
 
-    , setColor: function(color) {
-        capo.cx.strokeStyle = color
-        $('.colordisplay').css('background-color', color)
+    , mouseMoveHandler: function(ev) {
+        var oldPos = capo.mousePos
+        if (oldPos === null) {
+          return
+        }
+
+        var newPos = capo.evPos(ev)
+
+        // Very simple front-end drawing simplification: if the
+        // mouse has moved zero or one pixels, that’s not
+        // enough.  Hopefully this is useful and not annoying.
+        if (capo.manhattanDistance(oldPos, newPos) < 2) {
+          return
+        }
+
+        capo.runAndSave("L"+[oldPos.x, oldPos.y, newPos.x, newPos.y].join(" "))
+        capo.mousePos = newPos
+      }
+
+    , evPos: function(ev) {
+        return { x: ev.pageX - capo.offsetLeft
+               , y: ev.pageY - capo.offsetTop
+               }
+      }
+
+    , manhattanDistance: function(a, b) {
+        return (Math.abs(a.x - b.x) +
+                Math.abs(a.y - b.y))
       }
 
       // Argument is a nonempty string or null.
@@ -97,6 +122,17 @@ var capo =
         }
       }
 
+      // For drawings created in the first few hours of
+      // development.
+    , upgradePoint: function(point) {
+        return { x: point[0], y: point[1] }
+      }
+
+    , runAndSave: function(command) {
+        capo.run(command)
+        capo.saveCommand(command)
+      }
+
     , run: function(command) {
         var type = command.charAt(0)
         if (type === 'L') {
@@ -108,30 +144,6 @@ var capo =
         }
       }
 
-    , mouseMoveHandler: function(ev) {
-        var oldPos = capo.mousePos
-        if (oldPos === null) {
-          return
-        }
-
-        var newPos = capo.evPos(ev)
-
-        // Very simple front-end drawing simplification: if the
-        // mouse has moved zero or one pixels, that’s not
-        // enough.  Hopefully this is useful and not annoying.
-        if (capo.manhattanDistance(oldPos, newPos) < 2) {
-          return
-        }
-
-        capo.runAndSave("L"+[oldPos.x, oldPos.y, newPos.x, newPos.y].join(" "))
-        capo.mousePos = newPos
-      }
-
-    , runAndSave: function(command) {
-        capo.run(command)
-        capo.saveCommand(command)
-      }
-
     , drawLine: function(coords) {
         var cx = capo.cx
         cx.beginPath()
@@ -140,26 +152,14 @@ var capo =
         cx.stroke()
       }
 
+    , setColor: function(color) {
+        capo.cx.strokeStyle = color
+        $('.colordisplay').css('background-color', color)
+      }
+
     , saveCommand: function(command) {
         capo.drawing.push(command)
         localStorage.currentDrawing = JSON.stringify(capo.drawing)
-      }
-
-    , evPos: function(ev) {
-        return { x: ev.pageX - capo.offsetLeft
-               , y: ev.pageY - capo.offsetTop
-               }
-      }
-
-    , manhattanDistance: function(a, b) {
-        return (Math.abs(a.x - b.x) +
-                Math.abs(a.y - b.y))
-      }
-
-      // For drawings created in the first few hours of
-      // development.
-    , upgradePoint: function(point) {
-        return { x: point[0], y: point[1] }
       }
     }
 
