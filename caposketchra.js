@@ -38,14 +38,14 @@
 // - use , penSizes: [ 1, 2, 4, 8, 16, 32, 64, 128 ]
 // - opacity controls backwards; fix them. allow , and . instead of < and >
 // - don't go fully transparent
-// - quickly kludge out the save-on-mouse-up thing
+// D quickly kludge out the save-on-mouse-up thing
 // - make localStorage linear-time
 // - add buttons to change pen size
 // - redraw color indicator to indicate pen size
 // - redraw color indicator to indicate opacity
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
 //   512x512 is a meg of memory down the drain, so we probably don’t
-//   want to save more than about 30 of those snapshots.  (Although 
+//   want to save more than about 30 of those snapshots.  (Although
 //   a PNG from .toDataURL() was only 215K.)   This will
 //   enable the stroke drawing code to be totally revamped so that
 //   you’re drawing entire multi-line strokes instead of bunches of
@@ -89,7 +89,7 @@ var capo =
 
         $(document)
         .keypress(capo.keyHandler)
-        .mouseup(function() { capo.drawPos = null })
+        .mouseup(function() { capo.drawPos = null; capo.saveDrawing() })
 
         $('.colorbutton')
         .click(function(ev) {
@@ -319,6 +319,9 @@ var capo =
 
     , saveCommand: function(command) {
         capo.drawing.push(command)
+      }
+
+    , saveDrawing: function() {
         localStorage.currentDrawing = JSON.stringify(capo.drawing)
       }
     }
