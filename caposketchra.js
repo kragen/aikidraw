@@ -39,8 +39,7 @@
 // D opacity controls backwards; fix them. allow , and . instead of < and >
 // D don't go fully transparent
 // D quickly kludge out the save-on-mouse-up thing
-// - make localStorage linear-time
-// - add buttons to change pen size
+// D add buttons to change pen size
 // - redraw color indicator to indicate pen size
 // - redraw color indicator to indicate opacity
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
@@ -54,10 +53,12 @@
 //   - make undo reasonably efficient on large drawings
 //   - totally revamp stroke drawing code to stop putting blots in the
 //     middle of translucent lines.
+//   - cut storage requirements by a factor of 2 or 3
 // - add buttons to change opacity
 // - save redo stack persistently!
 // - make eyedropper work properly with respect to alpha!
 // - make lines long enough to be sensibly antialiased
+// - make localStorage linear-time
 // - make localStorage memory-efficient
 // - add triangle/circle color picker
 // - add keyboard shortcut: p for a palette
@@ -95,6 +96,9 @@ var capo =
         .click(function(ev) {
           capo.runAndSave('c' + this.style.backgroundColor)
         })
+
+        $('.switchToSmallerPen').click(capo.switchToSmallerPen)
+        $('.switchToLargerPen').click(capo.switchToLargerPen)
 
         if (localStorage.currentDrawing) {
           capo.drawing = JSON.parse(localStorage.currentDrawing)

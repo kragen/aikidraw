@@ -3,15 +3,17 @@
 <title>CapoSketchRa</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <style>
-.colorbutton, .colordisplay { 
+.colorbutton, .colordisplay, .button { 
     height: 64px; 
     float: left; 
-    border-width: 1px 0px;
-    border-color: black;
-    border-style: solid;
+    border-width: 1px 0px 1px 1px;
+}
+.colorbutton, .colordisplay { 
+    border-style: outset;
 }
 .colorbutton { width: 64px }
 .colordisplay { width: 256px }
+.button { font-size: 200%; vertical-align: center; text-align: center; min-width: 1em }
 #c { display: block; clear: left; float: left; background-color: grey }
 /* stupid hack: */
 .explanation { padding-top: 100px; padding-left: 10px }
@@ -25,6 +27,8 @@
 <div class="colorbutton" style="background-color: blue"></div>
 <div class="colorbutton" style="background-color: magenta"></div>
 <div class="colorbutton" style="background-color: cyan"></div>
+<button class="switchToSmallerPen button">[</button>
+<button class="switchToLargerPen button">]</button>
 <div class="colordisplay"></div>
 <canvas width="512" height="512" id="c"></canvas>
 
