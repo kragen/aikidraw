@@ -14,45 +14,51 @@
 //     D make colorbutton click handler call it too
 //   D add current color indicator area
 // D reorganize code
-// - add different thicknesses (exponential pen sizes?)
+// D add different thicknesses (exponential pen sizes?)
 //   D basic addition done
 //   D circular pens
-//   - add buttons to change thickness
-//   - redraw color indicator to indicate pen width
-// - add different opacities
+// D add different opacities
 //   D added basic opacity, but now need to
-//   - totally revamp stroke drawing code to stop putting blots in the
-//     middle of translucent lines
-//   - add buttons to change opacity
 // D find out how to get image data from the canvas, needed for two
 //   things: the e eyedropper color picker, and faster redraws after
 //   undo or editing an existing stroke.  I *could* use
 //   canvas.toDataURL to take snapshots but I’d rather not.  Aha,
 //   getImageData() returns a snapshot, putImageData(snapshot, 0, 0)
 //   restores, and the imagedata itself is an RGBA 8-bit array on the
-//   property .data.  That means 512x512 is a meg of memory down the
-//   drain, so we probably don’t want to save more than about 30 of
-//   those snapshots.
+//   property .data.
 // D add undo
 // D add redo
-// - make undo undo more than a single pixel’s worth at a time
-// - save redo stack persistently!
-// - make undo reasonably efficient on large drawings
 // D make keys work in Firefox!  WTF is wrong?  oh, you have to listen
 //   on document, not document.body, for unfocused keypresses.
 // D add eyedropper color picker
-//   - make it work properly with respect to alpha!
+// D fix mouseup in the rest of the document
+// D add keyboard shortcuts: e for picking color from under the mouse,
+//   z for undo, y for redo, [ for smaller brush, ] for larger brush,
+//   < to increase opacity, > to decrease opacity
+// - add buttons to change pen size
+// - redraw color indicator to indicate pen size
+// - redraw color indicator to indicate opacity
+// - Redraw with snapshots.  The imagedata being RGBA 8-bit means
+//   512x512 is a meg of memory down the drain, so we probably don’t
+//   want to save more than about 30 of those snapshots.  This will
+//   enable the stroke drawing code to be totally revamped so that
+//   you’re drawing entire multi-line strokes instead of bunches of
+//   individual lines, which will also accomplish the following:
+//   - make undo undo more than a single pixel’s worth at a time
+//   - make undo reasonably efficient on large drawings
+//   - totally revamp stroke drawing code to stop putting blots in the
+//     middle of translucent lines.
+// - add buttons to change opacity
+// - save redo stack persistently!
+// - make eyedropper work properly with respect to alpha!
 // - make lines long enough to be sensibly antialiased
 // - make localStorage memory-efficient
 // - make localStorage linear-time
 // - add triangle/circle color picker
-// - add keyboard shortcuts: e for picking color from under the mouse,
-//   z for undo, y for redo, [ for smaller brush, ] for larger brush,
-//   < to increase opacity, > to decrease opacity, p for a palette
+// - add keyboard shortcut: p for a palette
 // - write a server-side so sketches can be shared
-// D fix mouseup in the rest of the document
 // - add timed replay
-// - record delays
+// - record delays for replay
 
 var capo =
     { drawPos: null
