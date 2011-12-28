@@ -4,7 +4,7 @@
 // D store lines in localStorage
 // D namespace everything
 // - add different colors
-//   - make drawing be a list of line-drawing instructions instead of
+//   D make drawing be a list of line-drawing instructions instead of
 //     a list of lines
 //   - add two color change buttons (black and white)
 //     - draw two rectangles at startup in a command area
@@ -25,7 +25,7 @@
 //   z for undo, y for redo, [ for smaller brush, ] for larger brush,
 //   < to increase opacity, > to decrease opacity, p for a palette
 // - write a server-side so sketches can be shared
-
+// - fix mouseup in the rest of the document
 
 var capo =
     { mousePos: null
@@ -49,22 +49,53 @@ var capo =
 
         capo.cx.strokeStyle = '1px solid black'
 
-        var drawing = localStorage.currentDrawing
-        if (drawing) {
-          capo.drawing = JSON.parse(drawing)
-          capo.drawing.map(function(line) {
-            if (!line[0].x) {
-              line[0] = capo.upgradePoint(line[0])
-              line[1] = capo.upgradePoint(line[1])
-            }
+        capo.restoreDrawing(localStorage.currentDrawing)
+      }
 
-            capo.drawLine(line[0], line[1])
-          })
+      // Argument is a nonempty string or null.
+    , restoreDrawing: function(drawing) {
+        if (!drawing) {
+          return
+        }
+
+        capo.drawing = JSON.parse(drawing)
+        for (var ii = 0; ii < capo.drawing.length; ii++) {
+          var command = capo.drawing[ii]
+          // Determine whether we need to schema-migrate.  Current
+          // line command is like "L3 4 5 6"; previous version was
+          // [{x: 3, y: 4}, {x: 5, y: 6}]; version before that was
+          // [[3,4],[5,6]].
+          if (command.charAt) {
+            // No schema upgrade needed.
+          } else {
+            if (!command[0].x) {
+              command[0] = capo.upgradePoint(command[0])
+              command[1] = capo.upgradePoint(command[1])
+            }
+            // Now upgrade to the current format.
+            var p0 = command[0]
+              , p1 = command[1]
+
+            command = "L"+[p0.x, p0.y, p1.x, p1.y].join(" ")
+            capo.drawing[ii] = command
+          }
+
+          capo.run(command)
         }
       }
 
+    , run: function(command) {
+        // Currently all commands are line commands!
+        if (command.charAt(0) !== 'L') {
+          throw new Error(command)
+        }
+
+        capo.drawLine(command.substr(1).split(/ /))
+      }
+
     , mouseMoveHandler: function(ev) {
-        if (capo.mousePos === null) {
+        var oldPos = capo.mousePos
+        if (oldPos === null) {
           return
         }
 
@@ -73,24 +104,25 @@ var capo =
         // Very simple front-end drawing simplification: if the
         // mouse has moved zero or one pixels, that’s not
         // enough.  Hopefully this is useful and not annoying.
-        if (capo.manhattanDistance(capo.mousePos, newPos) < 2) {
+        if (capo.manhattanDistance(oldPos, newPos) < 2) {
           return
         }
 
-        capo.addLine(capo.mousePos, newPos)
-        capo.drawLine(capo.mousePos, newPos)
+        var command = "L"+[oldPos.x, oldPos.y, newPos.x, newPos.y].join(" ")
+        capo.run(command)
+        capo.saveCommand(command)
         capo.mousePos = newPos
       }
 
-    , drawLine: function(oldPos, newPos) {
+    , drawLine: function(coords) {
         var cx = capo.cx
-        cx.moveTo(oldPos.x, oldPos.y)
-        cx.lineTo(newPos.x, newPos.y)
+        cx.moveTo(coords[0], coords[1])
+        cx.lineTo(coords[2], coords[3])
         cx.stroke()
       }
 
-    , addLine: function(oldPos, newPos) {
-        capo.drawing.push([oldPos, newPos])
+    , saveCommand: function(command) {
+        capo.drawing.push(command)
         localStorage.currentDrawing = JSON.stringify(capo.drawing)
       }
 
