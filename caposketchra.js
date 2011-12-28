@@ -3,14 +3,17 @@
 // D fix it so it works in Firefox
 // D store lines in localStorage
 // D namespace everything
-// - add different colors
+// D add different colors
 //   D make drawing be a list of line-drawing instructions instead of
 //     a list of lines
 //   D add two color change buttons (black and white) in HTML
 //   D add some more of them
 //   D make them change the drawing color
-//   - add color change instruction so that color change can be saved
+//   D add color change instruction so that color change can be saved
+//     D add a runAndSave function and use it for lines
+//     D make colorbutton click handler call it too
 //   D add current color indicator area
+// - reorganize code
 // - add different thicknesses (exponential pen sizes?)
 //   - circular pens
 // - add different opacities
@@ -47,7 +50,9 @@ var capo =
         .mousemove(capo.mouseMoveHandler)
 
         $('.colorbutton')
-        .click(function(ev) { capo.setColor(this.style.backgroundColor) })
+        .click(function(ev) {
+          capo.runAndSave('c' + this.style.backgroundColor)
+        })
 
         capo.cx.strokeStyle = '1px solid'
         capo.setColor('black')
@@ -59,7 +64,6 @@ var capo =
         capo.cx.strokeStyle = color
         $('.colordisplay').css('background-color', color)
       }
-
 
       // Argument is a nonempty string or null.
     , restoreDrawing: function(drawing) {
@@ -94,12 +98,14 @@ var capo =
       }
 
     , run: function(command) {
-        // Currently all commands are line commands!
-        if (command.charAt(0) !== 'L') {
+        var type = command.charAt(0)
+        if (type === 'L') {
+          capo.drawLine(command.substr(1).split(/ /))
+        } else if (type === 'c') {
+          capo.setColor(command.substr(1))
+        } else {
           throw new Error(command)
         }
-
-        capo.drawLine(command.substr(1).split(/ /))
       }
 
     , mouseMoveHandler: function(ev) {
@@ -117,10 +123,13 @@ var capo =
           return
         }
 
-        var command = "L"+[oldPos.x, oldPos.y, newPos.x, newPos.y].join(" ")
+        capo.runAndSave("L"+[oldPos.x, oldPos.y, newPos.x, newPos.y].join(" "))
+        capo.mousePos = newPos
+      }
+
+    , runAndSave: function(command) {
         capo.run(command)
         capo.saveCommand(command)
-        capo.mousePos = newPos
       }
 
     , drawLine: function(coords) {
