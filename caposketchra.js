@@ -16,9 +16,14 @@
 // D reorganize code
 // - add different thicknesses (exponential pen sizes?)
 //   D basic addition done
-//   - circular pens
+//   D circular pens
+//   - add buttons to change thickness
 //   - redraw color indicator to indicate pen width
 // - add different opacities
+//   D added basic opacity, but now need to
+//   - totally revamp stroke drawing code to stop putting blots in the
+//     middle of translucent lines
+//   - add buttons for it
 // - add undo
 // - add redo
 // - make lines long enough to be sensibly antialiased
@@ -58,6 +63,7 @@ var capo =
 
         capo.setPenSize(1)
         capo.setColor('black')
+        capo.setOpacity(1.0)
 
         capo.restoreDrawing(localStorage.currentDrawing)
       }
@@ -93,10 +99,15 @@ var capo =
       }
 
     , keyHandler: function(ev) {
-        if (ev.which === '['.charCodeAt(0)) {
+        var c = String.fromCharCode(ev.which)
+        if (c === '[') {
           capo.switchToSmallerPen()
-        } else if (ev.which === ']'.charCodeAt(0)) {
+        } else if (c === ']') {
           capo.switchToLargerPen()
+        } else if (c === '<') {
+          capo.increaseOpacity()
+        } else if (c === '>') {
+          capo.decreaseOpacity()
         }
       }
 
@@ -127,6 +138,16 @@ var capo =
         idx++
 
         capo.runAndSave('s' + capo.penSizes[idx])
+      }
+
+    , increaseOpacity: function() {
+        var opacity = Math.min(1, capo.opacity + 0.125)
+        capo.runAndSave('a' + opacity)
+      }
+
+    , decreaseOpacity: function() {
+        var opacity = Math.max(0, capo.opacity - 0.125)
+        capo.runAndSave('a' + opacity)
       }
 
       // Argument is a nonempty string or null.
@@ -174,12 +195,15 @@ var capo =
 
     , run: function(command) {
         var type = command.charAt(0)
+          , args = command.substr(1)
         if (type === 'L') {
-          capo.drawLine(command.substr(1).split(/ /))
+          capo.drawLine(args.split(/ /))
         } else if (type === 'c') {
-          capo.setColor(command.substr(1))
+          capo.setColor(args)
         } else if (type === 's') {
-          capo.setPenSize(+command.substr(1))
+          capo.setPenSize(+args)
+        } else if (type === 'a') {
+          capo.setOpacity(+args)
         } else {
           throw new Error(command)
         }
@@ -218,8 +242,16 @@ var capo =
       }
 
     , setPenSize: function(penSize) {
-        window.console && console.log(penSize)
         capo.cx.lineWidth = capo.penSize = penSize
+      }
+
+    , setOpacity: function(opacity) {
+        console.log(opacity)
+        if (isNaN(opacity)) {
+          opacity = 1.0
+        }
+
+        capo.opacity = capo.cx.globalAlpha = opacity
       }
 
     , saveCommand: function(command) {
