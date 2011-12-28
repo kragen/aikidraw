@@ -187,14 +187,33 @@ var capo =
 
     , drawLine: function(coords) {
         var cx = capo.cx
+          , x0 = coords[0]
+          , y0 = coords[1]
+          , x1 = coords[2]
+          , y1 = coords[3]
+
         cx.beginPath()
-        cx.moveTo(coords[0], coords[1])
-        cx.lineTo(coords[2], coords[3])
+        cx.moveTo(x0, y0)
+        cx.lineTo(x1, y1)
         cx.stroke()
+
+        // I’m figuring the line joins don’t matter for lines of 1 or
+        // 2 pixels’ width.
+        if (capo.penSize > 2) {
+          capo.fillCircle(x0, y0, capo.penSize)
+          capo.fillCircle(x1, y1, capo.penSize)
+        }
+      }
+
+    , fillCircle: function(x, y, diameter) {
+        var cx = capo.cx
+        cx.beginPath()
+        cx.arc(x, y, diameter/2, 0, 2*Math.PI, false)
+        cx.fill()
       }
 
     , setColor: function(color) {
-        capo.cx.strokeStyle = color
+        capo.cx.strokeStyle = capo.cx.fillStyle = color
         $('.colordisplay').css('background-color', color)
       }
 
