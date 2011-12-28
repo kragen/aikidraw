@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<head>
+<title>Aikidraw</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+.colorbutton, .colordisplay, .button { 
+    height: 64px; 
+    float: left; 
+    border-width: 1px 0px 1px 1px;
+}
+.colorbutton, .colordisplay { border-style: outset }
+.colorbutton { width: 64px }
+.colordisplay { width: 256px }
+.button { font-size: 141%; vertical-align: center; text-align: center; min-width: 1em }
+#c { display: block; clear: left; float: left; background-color: grey }
+/* stupid hack: */
+.explanation { padding-top: 100px; padding-left: 10px }
+</style>
+<body>
+<div class="colorbutton" style="background-color: black"></div>
+<div class="colorbutton" style="background-color: white"></div>
+<div class="colorbutton" style="background-color: red"></div>
+<div class="colorbutton" style="background-color: yellow"></div>
+<div class="colorbutton" style="background-color: #00ff00"></div>
+<div class="colorbutton" style="background-color: blue"></div>
+<div class="colorbutton" style="background-color: magenta"></div>
+<div class="colorbutton" style="background-color: cyan"></div>
+<button class="switchToSmallerPen button">[</button>
+<button class="switchToLargerPen button">]</button>
+<button class="decreaseOpacity button">&lt;<br/>,</button>
+<button class="increaseOpacity button">&gt;<br/>.</button>
+<canvas class="colordisplay"></canvas>
+<canvas width="512" height="512" id="c"></canvas>
+
+<p class="explanation">Click colored squares to change colors. [ and ]
+change pen width; &lt; decreases opacity, and > increases it; z
+undoes, and y redoes; and e picks the color the mouse is currently
+over.  The drawing is saved in your browser’s local storage.
+
+<p>I’ll get on the knobbly appearance of joints of translucent lines
+pretty soon.
+
+<script src="jquery-1.2.6.js"></script>
+<script src="aikidraw.js"></script>
+</body>
