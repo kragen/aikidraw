@@ -34,7 +34,7 @@
 //   z for undo, y for redo, [ for smaller brush, ] for larger brush,
 //   < to increase opacity, > to decrease opacity, p for a palette
 // - write a server-side so sketches can be shared
-// - fix mouseup in the rest of the document
+// D fix mouseup in the rest of the document
 
 var capo =
     { mousePos: null
@@ -51,10 +51,11 @@ var capo =
 
         cv
         .mousedown(function(ev) { capo.mousePos = capo.evPos(ev) })
-        .mouseup(function() { capo.mousePos = null })
         .mousemove(capo.mouseMoveHandler)
 
-        $(document.body).keypress(capo.keyHandler)
+        $(document.body)
+        .keypress(capo.keyHandler)
+        .mouseup(function() { capo.mousePos = null })
 
         $('.colorbutton')
         .click(function(ev) {
