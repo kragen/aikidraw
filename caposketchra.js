@@ -49,7 +49,7 @@ var capo =
 
         capo.cx.strokeStyle = '1px solid black'
 
-        var drawing = localStorage.getItem('currentDrawing')
+        var drawing = localStorage.currentDrawing
         if (drawing) {
           capo.drawing = JSON.parse(drawing)
           capo.drawing.map(function(line) {
@@ -91,7 +91,7 @@ var capo =
 
     , addLine: function(oldPos, newPos) {
         capo.drawing.push([oldPos, newPos])
-        localStorage.setItem('currentDrawing', JSON.stringify(capo.drawing))
+        localStorage.currentDrawing = JSON.stringify(capo.drawing)
       }
 
     , evPos: function(ev) {
