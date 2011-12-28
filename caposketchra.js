@@ -35,12 +35,18 @@
 // D add keyboard shortcuts: e for picking color from under the mouse,
 //   z for undo, y for redo, [ for smaller brush, ] for larger brush,
 //   < to increase opacity, > to decrease opacity
+// - use , penSizes: [ 1, 2, 4, 8, 16, 32, 64, 128 ]
+// - opacity controls backwards; fix them. allow , and . instead of < and >
+// - don't go fully transparent
+// - quickly kludge out the save-on-mouse-up thing
+// - make localStorage linear-time
 // - add buttons to change pen size
 // - redraw color indicator to indicate pen size
 // - redraw color indicator to indicate opacity
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
 //   512x512 is a meg of memory down the drain, so we probably don’t
-//   want to save more than about 30 of those snapshots.  This will
+//   want to save more than about 30 of those snapshots.  (Although 
+//   a PNG from .toDataURL() was only 215K.)   This will
 //   enable the stroke drawing code to be totally revamped so that
 //   you’re drawing entire multi-line strokes instead of bunches of
 //   individual lines, which will also accomplish the following:
@@ -53,7 +59,6 @@
 // - make eyedropper work properly with respect to alpha!
 // - make lines long enough to be sensibly antialiased
 // - make localStorage memory-efficient
-// - make localStorage linear-time
 // - add triangle/circle color picker
 // - add keyboard shortcut: p for a palette
 // - write a server-side so sketches can be shared
