@@ -35,7 +35,7 @@
 // D add keyboard shortcuts: e for picking color from under the mouse,
 //   z for undo, y for redo, [ for smaller brush, ] for larger brush,
 //   < to increase opacity, > to decrease opacity
-// - use , penSizes: [ 1, 2, 4, 8, 16, 32, 64, 128 ]
+// D use , penSizes: [ 1, 2, 4, 8, 16, 32, 64, 128 ]
 // - opacity controls backwards; fix them. allow , and . instead of < and >
 // - don't go fully transparent
 // D quickly kludge out the save-on-mouse-up thing
@@ -69,7 +69,7 @@ var capo =
     { drawPos: null
     , mousePos: { x: 0, y: 0 }
     , drawing: []
-    , penSizes: [ 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256 ]
+    , penSizes: [ 1, 2, 4, 8, 16, 32, 64, 128 ]
     , redoStack: []
     , pendingRedraw: null
 
