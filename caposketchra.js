@@ -3,11 +3,20 @@
 // D fix it so it works in Firefox
 // D store lines in localStorage
 // D namespace everything
-// - add multiple colors
-// - add multiple thicknesses
+// - add different colors
+// - add different thicknesses (exponential pen sizes?)
+//   - circular pens
+// - add different opacities
+// - add undo
 // - make lines long enough to be sensibly antialiased
 // - make localStorage memory-efficient
 // - make localStorage linear-time
+// - add triangle/circle color picker
+// - add keyboard shortcuts: e for picking color from under the mouse,
+//   z for undo, y for redo, [ for smaller brush, ] for larger brush,
+//   < to increase opacity, > to decrease opacity, p for a palette
+// - write a server-side so sketches can be shared
+
 
 var capo =
     { mousePos: null
