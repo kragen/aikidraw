@@ -1,14 +1,22 @@
 // TODO:
 // D draw lines with mouse
 // D fix it so it works in Firefox
-// - store lines in localStorage
+// D store lines in localStorage
+// - namespace everything
+// - add multiple colors
+// - add multiple thicknesses
+// - make localStorage memory-efficient
+// - make localStorage linear-time
+
+$(setup) // for some reason Firefox can't getElementById before DOMContentLoaded
 
 var mousePos = null
   , cx = null
   , offsetTop = null
   , offsetLeft = null
+  , drawing = []
 
-$(function() {
+function setup() {
   var cv = $('#c')
     , offset = cv.offset()
 
@@ -22,7 +30,14 @@ $(function() {
   .mousemove(mouseMoveHandler)
 
   cx.strokeStyle = '1px solid black'
-})
+
+  if (localStorage.getItem('currentDrawing')) {
+    drawing = JSON.parse(localStorage.getItem('currentDrawing'))
+    drawing.map(function(line) {
+      drawLine(line[0], line[1])
+    })
+  }
+}
 
 function mouseMoveHandler(ev) {
   if (mousePos === null) {
@@ -30,12 +45,20 @@ function mouseMoveHandler(ev) {
   }
 
   var newPos = evPos(ev)
+  addLine(mousePos, newPos)
+  drawLine(mousePos, newPos)
+  mousePos = newPos
+}
 
-  cx.moveTo(mousePos[0], mousePos[1])
+function drawLine(oldPos, newPos) {
+  cx.moveTo(oldPos[0], oldPos[1])
   cx.lineTo(newPos[0], newPos[1])
   cx.stroke()
+}
 
-  mousePos = newPos
+function addLine(oldPos, newPos) {
+  drawing.push([oldPos, newPos])
+  localStorage.setItem('currentDrawing', JSON.stringify(drawing))
 }
 
 function evPos(ev) {
