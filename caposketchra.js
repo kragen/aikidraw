@@ -38,6 +38,7 @@
 // - make undo undo more than a single pixel’s worth at a time
 // - save redo stack persistently!
 // - make undo reasonably efficient on large drawings
+// - make keys work in Firefox!  WTF is wrong?
 // D add eyedropper color picker
 //   - make it work properly with respect to alpha!
 // - make lines long enough to be sensibly antialiased
