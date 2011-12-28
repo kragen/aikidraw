@@ -37,7 +37,7 @@
 //   < to increase opacity, > to decrease opacity
 // D use , penSizes: [ 1, 2, 4, 8, 16, 32, 64, 128 ]
 // D opacity controls backwards; fix them. allow , and . instead of < and >
-// - don't go fully transparent
+// D don't go fully transparent
 // D quickly kludge out the save-on-mouse-up thing
 // - make localStorage linear-time
 // - add buttons to change pen size
@@ -187,7 +187,7 @@ var capo =
       }
 
     , decreaseOpacity: function() {
-        var opacity = Math.max(0, capo.opacity - 0.125)
+        var opacity = Math.max(0.125, capo.opacity - 0.125)
         capo.runAndSave('a' + opacity)
       }
 
