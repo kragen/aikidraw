@@ -40,8 +40,8 @@
 // D don't go fully transparent
 // D quickly kludge out the save-on-mouse-up thing
 // D add buttons to change pen size
-// - redraw color indicator to indicate pen size
-// - redraw color indicator to indicate opacity
+// D redraw color indicator to indicate pen size
+// D redraw color indicator to indicate opacity
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
 //   512x512 is a meg of memory down the drain, so we probably don’t
 //   want to save more than about 30 of those snapshots.  (Although
@@ -65,6 +65,9 @@
 // - write a server-side so sketches can be shared
 // - add timed replay
 // - record delays for replay
+// - handle window reflows correctly!
+// - display a moving colored translucent dot under the cursor
+// - prevent doubleclicks on canvas from selecting stuff
 
 var capo =
     { drawPos: null
@@ -306,11 +309,12 @@ var capo =
 
     , setColor: function(color) {
         capo.cx.strokeStyle = capo.cx.fillStyle = color
-        $('.colordisplay').css('background-color', color)
+        capo.updateColorDisplay()
       }
 
     , setPenSize: function(penSize) {
         capo.cx.lineWidth = capo.penSize = penSize
+        capo.updateColorDisplay()
       }
 
     , setOpacity: function(opacity) {
@@ -319,6 +323,42 @@ var capo =
         }
 
         capo.opacity = capo.cx.globalAlpha = opacity
+        capo.updateColorDisplay()
+      }
+
+    , updateColorDisplay: function() {
+        var cdjq = $('.colordisplay')
+          , cd = cdjq[0]
+
+        // This allows us to get .colordisplay size from CSS without
+        // distorting the drawing in it.
+        cd.width = cdjq.width()
+        cd.height = cdjq.height()
+
+        var cx = cd.getContext('2d')
+          , ww = cd.width
+          , hh = cd.height
+
+        // Black and white background
+        cx.globalAlpha = 1.0
+        cx.fillStyle = 'black'
+        cx.fillRect(0, 0, ww/2, hh)
+        cx.fillStyle = 'white'
+        cx.fillRect(ww/2, 0, ww/2, hh)
+
+        // Draw a jaunty diagonal line
+
+        cx.lineCap = 'round'
+        cx.strokeStyle = capo.cx.strokeStyle
+        cx.lineWidth = capo.cx.lineWidth
+        cx.globalAlpha = capo.opacity
+
+        var mm = capo.cx.lineWidth / 2 // minimal margin
+
+        cx.beginPath()
+        cx.moveTo(Math.max(ww/8, mm), Math.min(hh*3/4, hh-mm))
+        cx.lineTo(Math.min(ww*7/8, ww-mm), Math.max(hh/4, mm))
+        cx.stroke()
       }
 
     , saveCommand: function(command) {

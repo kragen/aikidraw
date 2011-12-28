@@ -8,9 +8,7 @@
     float: left; 
     border-width: 1px 0px 1px 1px;
 }
-.colorbutton, .colordisplay { 
-    border-style: outset;
-}
+.colorbutton, .colordisplay { border-style: outset }
 .colorbutton { width: 64px }
 .colordisplay { width: 256px }
 .button { font-size: 200%; vertical-align: center; text-align: center; min-width: 1em }
@@ -29,7 +27,7 @@
 <div class="colorbutton" style="background-color: cyan"></div>
 <button class="switchToSmallerPen button">[</button>
 <button class="switchToLargerPen button">]</button>
-<div class="colordisplay"></div>
+<canvas class="colordisplay"></canvas>
 <canvas width="512" height="512" id="c"></canvas>
 
 <p class="explanation">Click colored squares to change colors. [ and ]
