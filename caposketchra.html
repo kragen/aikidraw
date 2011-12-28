@@ -1,5 +1,30 @@
 <!DOCTYPE html>
+<head>
+<title>CapoSketchRa</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+.colorbutton, .colordisplay { 
+    height: 64px; 
+    float: left; 
+    border-width: 1px 0px;
+    border-color: black;
+    border-style: solid;
+}
+.colorbutton { width: 64px }
+.colordisplay { width: 256px }
+#c { display: block; clear: left }
+</style>
+<body>
+<div class="colorbutton" style="background-color: black"></div>
+<div class="colorbutton" style="background-color: white"></div>
+<div class="colorbutton" style="background-color: red"></div>
+<div class="colorbutton" style="background-color: yellow"></div>
+<div class="colorbutton" style="background-color: green"></div>
+<div class="colorbutton" style="background-color: blue"></div>
+<div class="colorbutton" style="background-color: magenta"></div>
+<div class="colorbutton" style="background-color: cyan"></div>
+<div class="colordisplay"></div>
 <canvas width="512" height="512" id="c"></canvas>
 <script src="jquery-1.2.6.js"></script>
 <script src="caposketchra.js"></script>
+</body>

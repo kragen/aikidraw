@@ -6,12 +6,11 @@
 // - add different colors
 //   D make drawing be a list of line-drawing instructions instead of
 //     a list of lines
-//   - add two color change buttons (black and white)
-//     - draw two rectangles at startup in a command area
-//     - in mouse handlers, check to see if we are in the command
-//       area; if so, invoke commands instead of drawing
+//   D add two color change buttons (black and white) in HTML
+//   D add some more of them
+//   D make them change the drawing color
 //   - add color change instruction so that color change can be saved
-//   - add current color indicator area
+//   D add current color indicator area
 // - add different thicknesses (exponential pen sizes?)
 //   - circular pens
 // - add different opacities
@@ -47,10 +46,20 @@ var capo =
         .mouseup(function() { capo.mousePos = null })
         .mousemove(capo.mouseMoveHandler)
 
-        capo.cx.strokeStyle = '1px solid black'
+        $('.colorbutton')
+        .click(function(ev) { capo.setColor(this.style.backgroundColor) })
+
+        capo.cx.strokeStyle = '1px solid'
+        capo.setColor('black')
 
         capo.restoreDrawing(localStorage.currentDrawing)
       }
+
+    , setColor: function(color) {
+        capo.cx.strokeStyle = color
+        $('.colordisplay').css('background-color', color)
+      }
+
 
       // Argument is a nonempty string or null.
     , restoreDrawing: function(drawing) {
@@ -116,6 +125,7 @@ var capo =
 
     , drawLine: function(coords) {
         var cx = capo.cx
+        cx.beginPath()
         cx.moveTo(coords[0], coords[1])
         cx.lineTo(coords[2], coords[3])
         cx.stroke()
