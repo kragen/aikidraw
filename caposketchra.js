@@ -13,9 +13,11 @@
 //     D add a runAndSave function and use it for lines
 //     D make colorbutton click handler call it too
 //   D add current color indicator area
-// - reorganize code
+// D reorganize code
 // - add different thicknesses (exponential pen sizes?)
+//   D basic addition done
 //   - circular pens
+//   - redraw color indicator to indicate pen width
 // - add different opacities
 // - add undo
 // - add redo
@@ -31,10 +33,8 @@
 
 var capo =
     { mousePos: null
-    , cx: null
-    , offsetTop: null
-    , offsetLeft: null
     , drawing: []
+    , penSizes: [ 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256 ]
 
     , setup: function() {
         var cv = $('#c')
@@ -49,12 +49,14 @@ var capo =
         .mouseup(function() { capo.mousePos = null })
         .mousemove(capo.mouseMoveHandler)
 
+        $(document.body).keypress(capo.keyHandler)
+
         $('.colorbutton')
         .click(function(ev) {
           capo.runAndSave('c' + this.style.backgroundColor)
         })
 
-        capo.cx.strokeStyle = '1px solid'
+        capo.setPenSize(1)
         capo.setColor('black')
 
         capo.restoreDrawing(localStorage.currentDrawing)
@@ -88,6 +90,43 @@ var capo =
     , manhattanDistance: function(a, b) {
         return (Math.abs(a.x - b.x) +
                 Math.abs(a.y - b.y))
+      }
+
+    , keyHandler: function(ev) {
+        if (ev.which === '['.charCodeAt(0)) {
+          capo.switchToSmallerPen()
+        } else if (ev.which === ']'.charCodeAt(0)) {
+          capo.switchToLargerPen()
+        }
+      }
+
+    , switchToSmallerPen: function() {
+        var idx = capo.penSizes.indexOf(capo.penSize)
+
+        // Do nothing if already at smallest pen size.
+        if (idx === 0) {
+          return
+        }
+
+        if (idx === -1) {       // Can’t happen!
+          idx = 0
+        } else {
+          idx--
+        }
+
+        capo.runAndSave('s' + capo.penSizes[idx])
+      }
+
+    , switchToLargerPen: function() {
+        var idx = capo.penSizes.indexOf(capo.penSize)
+
+        if (idx === capo.penSizes.length - 1) {
+          return
+        }
+
+        idx++
+
+        capo.runAndSave('s' + capo.penSizes[idx])
       }
 
       // Argument is a nonempty string or null.
@@ -139,6 +178,8 @@ var capo =
           capo.drawLine(command.substr(1).split(/ /))
         } else if (type === 'c') {
           capo.setColor(command.substr(1))
+        } else if (type === 's') {
+          capo.setPenSize(+command.substr(1))
         } else {
           throw new Error(command)
         }
@@ -155,6 +196,11 @@ var capo =
     , setColor: function(color) {
         capo.cx.strokeStyle = color
         $('.colordisplay').css('background-color', color)
+      }
+
+    , setPenSize: function(penSize) {
+        window.console && console.log(penSize)
+        capo.cx.lineWidth = capo.penSize = penSize
       }
 
     , saveCommand: function(command) {
