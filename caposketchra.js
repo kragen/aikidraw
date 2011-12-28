@@ -24,8 +24,10 @@
 //   - totally revamp stroke drawing code to stop putting blots in the
 //     middle of translucent lines
 //   - add buttons for it
-// - add undo
-// - add redo
+// D add undo
+// D add redo
+// - make undo undo more than a single pixel’s worth at a time
+// - save redo stack persistently!
 // - make lines long enough to be sensibly antialiased
 // - make localStorage memory-efficient
 // - make localStorage linear-time
@@ -40,6 +42,7 @@ var capo =
     { mousePos: null
     , drawing: []
     , penSizes: [ 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256 ]
+    , redoStack: []
 
     , setup: function() {
         var cv = $('#c')
@@ -48,6 +51,8 @@ var capo =
         capo.cx = cv[0].getContext('2d')
         capo.offsetTop = offset.top
         capo.offsetLeft = offset.left
+        capo.width = cv[0].width
+        capo.height = cv[0].height
 
         cv
         .mousedown(function(ev) { capo.mousePos = capo.evPos(ev) })
@@ -62,13 +67,10 @@ var capo =
           capo.runAndSave('c' + this.style.backgroundColor)
         })
 
-        capo.setPenSize(1)
-        capo.setColor('black')
-        capo.setOpacity(1.0)
-        capo.cx.lineCap = 'round'
-        capo.cx.lineJoin = 'round'
-
-        capo.restoreDrawing(localStorage.currentDrawing)
+        if (localStorage.currentDrawing) {
+          capo.drawing = JSON.parse(localStorage.currentDrawing)
+        }
+        capo.restoreDrawing(capo.drawing)
       }
 
     , mouseMoveHandler: function(ev) {
@@ -111,6 +113,10 @@ var capo =
           capo.increaseOpacity()
         } else if (c === '>') {
           capo.decreaseOpacity()
+        } else if (c === 'z') {
+          capo.undo()
+        } else if (c === 'y') {
+          capo.redo()
         }
       }
 
@@ -153,15 +159,37 @@ var capo =
         capo.runAndSave('a' + opacity)
       }
 
-      // Argument is a nonempty string or null.
-    , restoreDrawing: function(drawing) {
-        if (!drawing) {
+    , undo: function() {
+        if (!capo.drawing.length) {
           return
         }
 
-        capo.drawing = JSON.parse(drawing)
-        for (var ii = 0; ii < capo.drawing.length; ii++) {
-          var command = capo.drawing[ii]
+        var command = capo.drawing.pop()
+        capo.redoStack.push(command)
+        capo.restoreDrawing(capo.drawing)
+      }
+
+    , redo: function() {
+        if (!capo.redoStack.length) {
+          return
+        }
+
+        capo.runAndSave(capo.redoStack.pop())
+      }
+
+      // Argument is a list of commands.
+    , restoreDrawing: function(drawing) {
+        capo.setPenSize(1)
+        capo.setColor('black')
+        capo.setOpacity(1.0)
+
+        var cx = capo.cx
+        cx.lineCap = 'round'
+        cx.lineJoin = 'round'
+        cx.clearRect(0, 0, capo.width, capo.height)
+
+        for (var ii = 0; ii < drawing.length; ii++) {
+          var command = drawing[ii]
           // Determine whether we need to schema-migrate.  Current
           // line command is like "L3 4 5 6"; previous version was
           // [{x: 3, y: 4}, {x: 5, y: 6}]; version before that was
@@ -178,7 +206,7 @@ var capo =
               , p1 = command[1]
 
             command = "L"+[p0.x, p0.y, p1.x, p1.y].join(" ")
-            capo.drawing[ii] = command
+            drawing[ii] = command
           }
 
           capo.run(command)
@@ -235,7 +263,6 @@ var capo =
       }
 
     , setOpacity: function(opacity) {
-        console.log(opacity)
         if (isNaN(opacity)) {
           opacity = 1.0
         }
