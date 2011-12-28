@@ -64,6 +64,8 @@ var capo =
         capo.setPenSize(1)
         capo.setColor('black')
         capo.setOpacity(1.0)
+        capo.cx.lineCap = 'round'
+        capo.cx.lineJoin = 'round'
 
         capo.restoreDrawing(localStorage.currentDrawing)
       }
@@ -220,20 +222,6 @@ var capo =
         cx.moveTo(x0, y0)
         cx.lineTo(x1, y1)
         cx.stroke()
-
-        // I’m figuring the line joins don’t matter for lines of 1 or
-        // 2 pixels’ width.
-        if (capo.penSize > 2) {
-          capo.fillCircle(x0, y0, capo.penSize)
-          capo.fillCircle(x1, y1, capo.penSize)
-        }
-      }
-
-    , fillCircle: function(x, y, diameter) {
-        var cx = capo.cx
-        cx.beginPath()
-        cx.arc(x, y, diameter/2, 0, 2*Math.PI, false)
-        cx.fill()
       }
 
     , setColor: function(color) {
