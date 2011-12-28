@@ -36,7 +36,7 @@
 //   z for undo, y for redo, [ for smaller brush, ] for larger brush,
 //   < to increase opacity, > to decrease opacity
 // D use , penSizes: [ 1, 2, 4, 8, 16, 32, 64, 128 ]
-// - opacity controls backwards; fix them. allow , and . instead of < and >
+// D opacity controls backwards; fix them. allow , and . instead of < and >
 // - don't go fully transparent
 // D quickly kludge out the save-on-mouse-up thing
 // - make localStorage linear-time
@@ -139,9 +139,9 @@ var capo =
           capo.switchToSmallerPen()
         } else if (c === ']') {
           capo.switchToLargerPen()
-        } else if (c === '<') {
+        } else if (c === '>' || c === '.') {
           capo.increaseOpacity()
-        } else if (c === '>') {
+        } else if (c === '<' || c === ',') {
           capo.decreaseOpacity()
         } else if (c === 'z') {
           capo.undo()
