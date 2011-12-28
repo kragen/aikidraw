@@ -23,12 +23,23 @@
 //   D added basic opacity, but now need to
 //   - totally revamp stroke drawing code to stop putting blots in the
 //     middle of translucent lines
-//   - add buttons for it
+//   - add buttons to change opacity
+// D find out how to get image data from the canvas, needed for two
+//   things: the e eyedropper color picker, and faster redraws after
+//   undo or editing an existing stroke.  I *could* use
+//   canvas.toDataURL to take snapshots but I’d rather not.  Aha,
+//   getImageData() returns a snapshot, putImageData(snapshot, 0, 0)
+//   restores, and the imagedata itself is an RGBA 8-bit array on the
+//   property .data.  That means 512x512 is a meg of memory down the
+//   drain, so we probably don’t want to save more than about 30 of
+//   those snapshots.
 // D add undo
 // D add redo
 // - make undo undo more than a single pixel’s worth at a time
 // - save redo stack persistently!
 // - make undo reasonably efficient on large drawings
+// D add eyedropper color picker
+//   - make it work properly with respect to alpha!
 // - make lines long enough to be sensibly antialiased
 // - make localStorage memory-efficient
 // - make localStorage linear-time
@@ -38,9 +49,12 @@
 //   < to increase opacity, > to decrease opacity, p for a palette
 // - write a server-side so sketches can be shared
 // D fix mouseup in the rest of the document
+// - add timed replay
+// - record delays
 
 var capo =
-    { mousePos: null
+    { drawPos: null
+    , mousePos: { x: 0, y: 0 }
     , drawing: []
     , penSizes: [ 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256 ]
     , redoStack: []
@@ -57,12 +71,12 @@ var capo =
         capo.height = cv[0].height
 
         cv
-        .mousedown(function(ev) { capo.mousePos = capo.evPos(ev) })
+        .mousedown(function(ev) { capo.drawPos = capo.evPos(ev) })
         .mousemove(capo.mouseMoveHandler)
 
         $(document.body)
         .keypress(capo.keyHandler)
-        .mouseup(function() { capo.mousePos = null })
+        .mouseup(function() { capo.drawPos = null })
 
         $('.colorbutton')
         .click(function(ev) {
@@ -76,12 +90,13 @@ var capo =
       }
 
     , mouseMoveHandler: function(ev) {
-        var oldPos = capo.mousePos
+        var newPos = capo.evPos(ev)
+        capo.mousePos = newPos
+
+        var oldPos = capo.drawPos
         if (oldPos === null) {
           return
         }
-
-        var newPos = capo.evPos(ev)
 
         // Very simple front-end drawing simplification: if the
         // mouse has moved zero or one pixels, that’s not
@@ -91,7 +106,7 @@ var capo =
         }
 
         capo.runAndSave("L"+[oldPos.x, oldPos.y, newPos.x, newPos.y].join(" "))
-        capo.mousePos = newPos
+        capo.drawPos = newPos
       }
 
     , evPos: function(ev) {
@@ -119,6 +134,8 @@ var capo =
           capo.undo()
         } else if (c === 'y') {
           capo.redo()
+        } else if (c === 'e') {
+          capo.pickColorFromImage()
         }
       }
 
@@ -180,6 +197,16 @@ var capo =
         }
 
         capo.runAndSave(capo.redoStack.pop())
+      }
+
+      // “Eyedropper” functionality
+    , pickColorFromImage: function() {
+        var pix = capo.cx.getImageData(capo.mousePos.x, capo.mousePos.y, 1, 1)
+          , pd = pix.data
+          , rgbstr = [pd[0], pd[1], pd[2]].join(',')
+          , color = 'rgb('+rgbstr+')'
+
+        capo.runAndSave('c' + color)
       }
 
     , redraw: function() {
