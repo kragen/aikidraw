@@ -44,6 +44,7 @@ var capo =
     , drawing: []
     , penSizes: [ 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256 ]
     , redoStack: []
+    , pendingRedraw: null
 
     , setup: function() {
         var cv = $('#c')
@@ -167,7 +168,10 @@ var capo =
 
         var command = capo.drawing.pop()
         capo.redoStack.push(command)
-        capo.redraw()
+        if (capo.pendingRedraw) {
+          clearTimeout(capo.pendingRedraw)
+        }
+        capo.pendingRedraw = setTimeout(capo.redraw, 150)
       }
 
     , redo: function() {
@@ -179,6 +183,7 @@ var capo =
       }
 
     , redraw: function() {
+        capo.pendingRedraw = null
         capo.setPenSize(1)
         capo.setColor('black')
         capo.setOpacity(1.0)
