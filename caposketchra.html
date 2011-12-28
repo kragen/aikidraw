@@ -12,7 +12,9 @@
 }
 .colorbutton { width: 64px }
 .colordisplay { width: 256px }
-#c { display: block; clear: left }
+#c { display: block; clear: left; float: left; background-color: grey }
+/* stupid hack: */
+.explanation { padding-top: 100px; padding-left: 10px }
 </style>
 <body>
 <div class="colorbutton" style="background-color: black"></div>
@@ -25,6 +27,15 @@
 <div class="colorbutton" style="background-color: cyan"></div>
 <div class="colordisplay"></div>
 <canvas width="512" height="512" id="c"></canvas>
+
+<p class="explanation">Click colored squares to change colors. [ and ]
+change pen width; &lt; increases opacity, and > decreases it; z
+undoes, and y redoes.  The drawing is saved in your browser’s local
+storage.
+
+<p>I’ll get on the knobbly appearance of joints of translucent lines
+pretty soon.
+
 <script src="jquery-1.2.6.js"></script>
 <script src="caposketchra.js"></script>
 </body>
