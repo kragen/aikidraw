@@ -4,10 +4,19 @@
 // D store lines in localStorage
 // D namespace everything
 // - add different colors
+//   - make drawing be a list of line-drawing instructions instead of
+//     a list of lines
+//   - add two color change buttons (black and white)
+//     - draw two rectangles at startup in a command area
+//     - in mouse handlers, check to see if we are in the command
+//       area; if so, invoke commands instead of drawing
+//   - add color change instruction so that color change can be saved
+//   - add current color indicator area
 // - add different thicknesses (exponential pen sizes?)
 //   - circular pens
 // - add different opacities
 // - add undo
+// - add redo
 // - make lines long enough to be sensibly antialiased
 // - make localStorage memory-efficient
 // - make localStorage linear-time
