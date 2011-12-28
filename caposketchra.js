@@ -54,7 +54,7 @@
 //   - totally revamp stroke drawing code to stop putting blots in the
 //     middle of translucent lines.
 //   - cut storage requirements by a factor of 2 or 3
-// - add buttons to change opacity
+// D add buttons to change opacity
 // - save redo stack persistently!
 // - make eyedropper work properly with respect to alpha!
 // - make lines long enough to be sensibly antialiased
@@ -102,6 +102,8 @@ var capo =
 
         $('.switchToSmallerPen').click(capo.switchToSmallerPen)
         $('.switchToLargerPen').click(capo.switchToLargerPen)
+        $('.decreaseOpacity').click(capo.decreaseOpacity)
+        $('.increaseOpacity').click(capo.increaseOpacity)
 
         if (localStorage.currentDrawing) {
           capo.drawing = JSON.parse(localStorage.currentDrawing)

@@ -11,7 +11,7 @@
 .colorbutton, .colordisplay { border-style: outset }
 .colorbutton { width: 64px }
 .colordisplay { width: 256px }
-.button { font-size: 200%; vertical-align: center; text-align: center; min-width: 1em }
+.button { font-size: 141%; vertical-align: center; text-align: center; min-width: 1em }
 #c { display: block; clear: left; float: left; background-color: grey }
 /* stupid hack: */
 .explanation { padding-top: 100px; padding-left: 10px }
@@ -27,6 +27,8 @@
 <div class="colorbutton" style="background-color: cyan"></div>
 <button class="switchToSmallerPen button">[</button>
 <button class="switchToLargerPen button">]</button>
+<button class="decreaseOpacity button">&lt;<br/>,</button>
+<button class="increaseOpacity button">&gt;<br/>.</button>
 <canvas class="colordisplay"></canvas>
 <canvas width="512" height="512" id="c"></canvas>
 
