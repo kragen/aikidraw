@@ -38,7 +38,8 @@
 // - make undo undo more than a single pixel’s worth at a time
 // - save redo stack persistently!
 // - make undo reasonably efficient on large drawings
-// - make keys work in Firefox!  WTF is wrong?
+// D make keys work in Firefox!  WTF is wrong?  oh, you have to listen
+//   on document, not document.body, for unfocused keypresses.
 // D add eyedropper color picker
 //   - make it work properly with respect to alpha!
 // - make lines long enough to be sensibly antialiased
@@ -75,7 +76,7 @@ var capo =
         .mousedown(function(ev) { capo.drawPos = capo.evPos(ev) })
         .mousemove(capo.mouseMoveHandler)
 
-        $(document.body)
+        $(document)
         .keypress(capo.keyHandler)
         .mouseup(function() { capo.drawPos = null })
 
