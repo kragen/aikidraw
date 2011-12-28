@@ -28,6 +28,7 @@
 // D add redo
 // - make undo undo more than a single pixel’s worth at a time
 // - save redo stack persistently!
+// - make undo reasonably efficient on large drawings
 // - make lines long enough to be sensibly antialiased
 // - make localStorage memory-efficient
 // - make localStorage linear-time
@@ -70,7 +71,7 @@ var capo =
         if (localStorage.currentDrawing) {
           capo.drawing = JSON.parse(localStorage.currentDrawing)
         }
-        capo.restoreDrawing(capo.drawing)
+        capo.redraw()
       }
 
     , mouseMoveHandler: function(ev) {
@@ -166,7 +167,7 @@ var capo =
 
         var command = capo.drawing.pop()
         capo.redoStack.push(command)
-        capo.restoreDrawing(capo.drawing)
+        capo.redraw()
       }
 
     , redo: function() {
@@ -177,13 +178,14 @@ var capo =
         capo.runAndSave(capo.redoStack.pop())
       }
 
-      // Argument is a list of commands.
-    , restoreDrawing: function(drawing) {
+    , redraw: function() {
         capo.setPenSize(1)
         capo.setColor('black')
         capo.setOpacity(1.0)
 
         var cx = capo.cx
+          , drawing = capo.drawing
+
         cx.lineCap = 'round'
         cx.lineJoin = 'round'
         cx.clearRect(0, 0, capo.width, capo.height)
