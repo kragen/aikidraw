@@ -15,9 +15,9 @@
 // - rename “command“s to “action“s? or “changes” or “deltas”?
 //   Prevayler calls them “commands”...
 // - do < > [ ] need to update the display of the current stroke?
-// - get performance to be acceptable again in Firefox
+// D get performance to be acceptable again in Firefox
 // - make clicking (as opposed to dragging) make dots
-// - make timer object instead of new Date()
+// D make timer object instead of new Date()
 
 var aiki =
     { drawPos: null
@@ -63,7 +63,7 @@ var aiki =
 
     , mouseDownHandler: function(ev) {
         ev.preventDefault()
-        aiki.strokeStart = new Date()
+        aiki.strokeTimer = aiki.timer()
         aiki.drawPos = aiki.evPos(ev)
 
         var cv = aiki.cx.canvas
@@ -77,7 +77,7 @@ var aiki =
 
         // Crudely measure performance.
         if (window.console) {
-          var strokeTime = new Date().getTime() - aiki.strokeStart.getTime()
+          var strokeTime = aiki.strokeTimer.elapsedMs()
             , dn = aiki.currentStroke.length/2 -1
           console.log('drew '+dn+' segments in '+strokeTime+' ms for Hz='
                      + Math.round(dn/strokeTime*1000)
@@ -115,6 +115,14 @@ var aiki =
         aiki.drawPos = newPos
       }
 
+    , timer: function() {
+        return { start: new Date()
+               , elapsedMs: function() {
+                   return new Date().getTime() - this.start.getTime()
+                 }
+               }
+      }
+
     , drawWithStroke: function() {
         aiki.cx.putImageData(aiki.snapshot, 0, 0)
         aiki.drawStroke(aiki.currentStroke)
@@ -148,10 +156,9 @@ var aiki =
           , timeout = null
           , callback = function() {
               timeout = null
-              var start = new Date()
+              var timer = aiki.timer()
               ff()
-              var duration = new Date().getTime() - start.getTime()
-              tt = Math.max(1, tt * 0.9, 2 * duration)
+              tt = Math.max(1, tt * 0.9, 2 * timer.elapsedMs())
             }
           , invoke = function() {
               if (timeout === null) timeout = setTimeout(callback, tt)
@@ -225,7 +232,7 @@ var aiki =
       }
 
     , redraw: function() {
-        var start = new Date()
+        var timer = aiki.timer()
           , cx = aiki.cx
 
         // Initialize some variables to their initial states.  Can’t
@@ -253,7 +260,7 @@ var aiki =
         if (window.console) {
           console.log( 'aikidraw redraw for '+aiki.drawing.length
                      + ' commands took ms: '
-                     + (new Date().getTime() - start.getTime())
+                     + timer.elapsedMs()
                      )
         }
       }
