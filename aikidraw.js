@@ -126,6 +126,9 @@ var aiki =
 
     , drawWithStroke: function() {
         if (!aiki.currentStroke) return
+        // In Firefox 3.6.11 on my netbook, this putImageData takes
+        // about 74ms!  That's why this function is called from an
+        // adaptiveUpdater.  takeSnapshot() is even slower, at 94ms.
         aiki.cx.putImageData(aiki.snapshot, 0, 0)
         aiki.drawStroke(aiki.currentStroke)
       }
