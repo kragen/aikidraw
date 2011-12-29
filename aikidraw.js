@@ -122,16 +122,12 @@ var capo =
         capo.mousePos = newPos
 
         var oldPos = capo.drawPos
-        if (oldPos === null) {
-          return
-        }
+        if (!oldPos) return
 
         // Very simple front-end drawing simplification: if the
         // mouse has moved zero or one pixels, that’s not
         // enough.  Hopefully this is useful and not annoying.
-        if (capo.manhattanDistance(oldPos, newPos) < 2) {
-          return
-        }
+        if (capo.manhattanDistance(oldPos, newPos) < 2) return
 
         capo.runAndSave("L"+[oldPos.x, oldPos.y, newPos.x, newPos.y].join(" "))
         capo.drawPos = newPos
@@ -150,9 +146,7 @@ var capo =
 
     , keyHandler: function(ev) {
         var k = capo.keyMap[String.fromCharCode(ev.which)]
-        if (k) {
-          capo[k]()
-        }
+        if (k) capo[k]()
       }
 
     , keyMap: { '[': 'switchToSmallerPen'
@@ -168,30 +162,17 @@ var capo =
 
     , switchToSmallerPen: function() {
         var idx = capo.penSizes.indexOf(capo.penSize)
-
         // Do nothing if already at smallest pen size.
-        if (idx === 0) {
-          return
-        }
-
-        if (idx === -1) {       // Can’t happen!
-          idx = 0
-        } else {
-          idx--
-        }
-
+        if (idx === 0) return
+        if (idx === -1) idx = 1 // Can’t happen!
+        idx--
         capo.runAndSave('s' + capo.penSizes[idx])
       }
 
     , switchToLargerPen: function() {
         var idx = capo.penSizes.indexOf(capo.penSize)
-
-        if (idx === capo.penSizes.length - 1) {
-          return
-        }
-
+        if (idx === capo.penSizes.length - 1) return
         idx++
-
         capo.runAndSave('s' + capo.penSizes[idx])
       }
 
@@ -206,23 +187,16 @@ var capo =
       }
 
     , undo: function() {
-        if (!capo.drawing.length) {
-          return
-        }
+        if (!capo.drawing.length) return
 
         var command = capo.drawing.pop()
         capo.redoStack.push(command)
-        if (capo.pendingRedraw) {
-          clearTimeout(capo.pendingRedraw)
-        }
+        if (capo.pendingRedraw) clearTimeout(capo.pendingRedraw)
         capo.pendingRedraw = setTimeout(capo.redraw, 150)
       }
 
     , redo: function() {
-        if (!capo.redoStack.length) {
-          return
-        }
-
+        if (!capo.redoStack.length) return
         capo.runAndSave(capo.redoStack.pop())
       }
 
@@ -299,10 +273,7 @@ var capo =
 
     , run: function(command) {
         var k = capo.commandMap[command.charAt(0)]
-        if (!k) {
-          throw new Error(command)
-        }
-
+        if (!k) throw new Error(command)
         capo[k](command.substr(1))
       }
 
