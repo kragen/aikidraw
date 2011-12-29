@@ -54,10 +54,10 @@
 //   enable the stroke drawing code to be totally revamped so that
 //   you’re drawing entire multi-line strokes instead of bunches of
 //   individual lines, which will also accomplish the following:
-//   - make undo undo more than a single pixel’s worth at a time
-//   - make undo reasonably efficient on large drawings
-//   - cut storage requirements by a factor of 2 or 3
-// - totally revamp stroke drawing code to stop putting blots in the
+//   D make undo undo more than a single pixel’s worth at a time
+//   D make undo reasonably efficient on large drawings
+//   D cut storage requirements by a factor of 2 or 3
+// D totally revamp stroke drawing code to stop putting blots in the
 //   middle of translucent lines.  Technically for this I only need a
 //   single snapshot.
 // D add buttons to change opacity
@@ -111,22 +111,40 @@ var aiki =
 
     , mouseDownHandler: function(ev) {
         ev.preventDefault()
-        aiki.strokeStart = { time: new Date(), n: aiki.drawing.length }
+        aiki.strokeStart = new Date()
         aiki.drawPos = aiki.evPos(ev)
+
+        var cv = aiki.cx.canvas
+        aiki.snapshot = aiki.cx.getImageData(0, 0, cv.width, cv.height)
+        aiki.currentStroke = [aiki.drawPos.x, aiki.drawPos.y]
+        aiki.drawWithStroke()
+      }
+
+    , drawWithStroke: function() {
+        aiki.cx.putImageData(aiki.snapshot, 0, 0)
+        aiki.drawStroke(aiki.currentStroke)
       }
 
     , mouseUpHandler: function() {
+        if (!aiki.drawPos) return
+
         // Crudely measure performance.
         if (window.console) {
-          var strokeTime =
-                new Date().getTime() - aiki.strokeStart.time.getTime()
-            , dn = aiki.drawing.length - aiki.strokeStart.n
+          var strokeTime = new Date().getTime() - aiki.strokeStart.getTime()
+            , dn = aiki.currentStroke.length/2 -1
           console.log('drew '+dn+' segments in '+strokeTime+' ms for Hz='
                      + Math.round(dn/strokeTime*1000)
                      )
         }
 
         aiki.drawPos = null
+        aiki.cx.putImageData(aiki.snapshot, 0, 0)
+        delete aiki.snapshot
+
+        // Convert current stroke into a line command.
+        aiki.runAndSave("L"+aiki.currentStroke.join(' '))
+        delete aiki.currentStroke
+
         aiki.saveDrawing()
       }
 
@@ -142,9 +160,12 @@ var aiki =
         // enough.  Hopefully this is useful and not annoying.
         if (aiki.manhattanDistance(oldPos, newPos) < 2) return
 
-        // Draw a line.
-        aiki.runAndSave("L"+[oldPos.x, oldPos.y, newPos.x, newPos.y].join(" "))
+        aiki.currentStroke.push(newPos.x)
+        aiki.currentStroke.push(newPos.y)
+
         aiki.drawPos = newPos
+
+        aiki.drawWithStroke()
       }
 
     , evPos: function(ev) {
@@ -277,16 +298,18 @@ var aiki =
                   }
 
     , drawLine: function(args) {
-        var cx = aiki.cx
-          , coords = args.split(/ /)
-          , x0 = coords[0]
-          , y0 = coords[1]
-          , x1 = coords[2]
-          , y1 = coords[3]
+        aiki.drawStroke(args.split(/ /))
+      }
 
+    , drawStroke: function(stroke) {
+        var cx = aiki.cx
         cx.beginPath()
-        cx.moveTo(x0, y0)
-        cx.lineTo(x1, y1)
+
+        cx.moveTo(stroke[0], stroke[1])
+        for (var ii = 2; ii < stroke.length; ii += 2) {
+          cx.lineTo(stroke[ii], stroke[ii+1])
+        }
+
         cx.stroke()
       }
 
