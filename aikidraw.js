@@ -47,6 +47,7 @@
 // D replace `capo.` with `aiki.` in all the JS
 // D prevent doubleclicks on canvas from selecting stuff
 // D handle window reflows correctly!
+// - does undo need to updateColorDisplay?
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
 //   512x512 is a meg of memory down the drain, so we probably don’t
 //   want to save more than about 30 of those snapshots.  (Although
@@ -72,7 +73,6 @@
 // - record delays for replay
 // - display a moving colored translucent dot under the cursor
 // - rename “command“s to “action“s? or “changes” or “deltas”?
-// - does undo need to updateColorDisplay?
 // - do < > [ ] need to update the display of the current stroke?
 // - get performance to be acceptable again in Firefox
 // - make clicking (as opposed to dragging) make dots
@@ -125,11 +125,6 @@ var aiki =
         aiki.drawWithStroke()
       }
 
-    , drawWithStroke: function() {
-        aiki.cx.putImageData(aiki.snapshot, 0, 0)
-        aiki.drawStroke(aiki.currentStroke)
-      }
-
     , mouseUpHandler: function() {
         if (!aiki.drawPos) return
 
@@ -171,6 +166,11 @@ var aiki =
         aiki.drawPos = newPos
 
         aiki.drawWithStroke()
+      }
+
+    , drawWithStroke: function() {
+        aiki.cx.putImageData(aiki.snapshot, 0, 0)
+        aiki.drawStroke(aiki.currentStroke)
       }
 
     , evPos: function(ev) {
