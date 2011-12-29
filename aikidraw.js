@@ -249,7 +249,7 @@ var capo =
 
         // Fill background with cream.  Assumes globalAlpha is already
         // 1.0.
-        cx.fillStyle = '#BFAF73'
+        cx.fillStyle = '#E1B870'
         cx.fillRect(0, 0, capo.width, capo.height)
 
         // This variable gets initialized after filling in the
