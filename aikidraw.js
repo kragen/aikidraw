@@ -1,71 +1,14 @@
 // TODO:
-// D draw lines with mouse
-// D fix it so it works in Firefox
-// D store lines in localStorage
-// D namespace everything
-// D add different colors
-//   D make drawing be a list of line-drawing instructions instead of
-//     a list of lines
-//   D add two color change buttons (black and white) in HTML
-//   D add some more of them
-//   D make them change the drawing color
-//   D add color change instruction so that color change can be saved
-//     D add a runAndSave function and use it for lines
-//     D make colorbutton click handler call it too
-//   D add current color indicator area
-// D reorganize code
-// D add different thicknesses (exponential pen sizes?)
-//   D basic addition done
-//   D circular pens
-// D add different opacities
-//   D added basic opacity, but now need to
-// D find out how to get image data from the canvas, needed for two
-//   things: the e eyedropper color picker, and faster redraws after
-//   undo or editing an existing stroke.  I *could* use
-//   canvas.toDataURL to take snapshots but I’d rather not.  Aha,
-//   getImageData() returns a snapshot, putImageData(snapshot, 0, 0)
-//   restores, and the imagedata itself is an RGBA 8-bit array on the
-//   property .data.
-// D add undo
-// D add redo
-// D make keys work in Firefox!  WTF is wrong?  oh, you have to listen
-//   on document, not document.body, for unfocused keypresses.
-// D add eyedropper color picker
-// D fix mouseup in the rest of the document
-// D add keyboard shortcuts: e for picking color from under the mouse,
-//   z for undo, y for redo, [ for smaller brush, ] for larger brush,
-//   < to increase opacity, > to decrease opacity
-// D use , penSizes: [ 1, 2, 4, 8, 16, 32, 64, 128 ]
-// D opacity controls backwards; fix them. allow , and . instead of < and >
-// D don't go fully transparent
-// D quickly kludge out the save-on-mouse-up thing
-// D add buttons to change pen size
-// D redraw color indicator to indicate pen size
-// D redraw color indicator to indicate opacity
-// D make eyedropper work properly with respect to alpha!
-// D remove no-longer-needed schema upgrade code
-// D replace `capo.` with `aiki.` in all the JS
-// D prevent doubleclicks on canvas from selecting stuff
-// D handle window reflows correctly!
-// - does undo need to updateColorDisplay?
+// D get performance to be acceptable again in Firefox
+// D make clicking (as opposed to dragging) make dots
+// D make timer object instead of new Date()
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
 //   512x512 is a meg of memory down the drain, so we probably don’t
 //   want to save more than about 30 of those snapshots.  (Although
-//   a PNG from .toDataURL() was only 215K.)   This will
-//   enable the stroke drawing code to be totally revamped so that
-//   you’re drawing entire multi-line strokes instead of bunches of
-//   individual lines, which will also accomplish the following:
-//   D make undo undo more than a single pixel’s worth at a time
-//   D make undo reasonably efficient on large drawings
-//   D cut storage requirements by a factor of 2 or 3
-// D totally revamp stroke drawing code to stop putting blots in the
-//   middle of translucent lines.  Technically for this I only need a
-//   single snapshot.
-// D add buttons to change opacity
+//   a PNG from .toDataURL() was only 215K.)
 // - save redo stack persistently!
 // - make lines long enough to be sensibly antialiased
 // - make localStorage linear-time
-// - make localStorage memory-efficient
 // - add triangle/circle color picker
 // - add keyboard shortcut: p for a palette
 // - write a server-side so sketches can be shared
@@ -73,9 +16,10 @@
 // - record delays for replay
 // - display a moving colored translucent dot under the cursor
 // - rename “command“s to “action“s? or “changes” or “deltas”?
-// - do < > [ ] need to update the display of the current stroke?
-// - get performance to be acceptable again in Firefox
-// - make clicking (as opposed to dragging) make dots
+//   Prevayler calls them “commands”...
+// D do < > [ ] need to update the display of the current stroke?
+// - rename unclearly-labeled functions. drawWithStroke!?
+// - move brush redrawing above image redrawing to preserve top-down-ness
 
 var aiki =
     { drawPos: null
@@ -83,12 +27,14 @@ var aiki =
     , drawing: []
     , penSizes: [ 1, 2, 4, 8, 16, 32, 64, 128 ]
     , redoStack: []
-    , pendingRedraw: null
 
     , setup: function() {
         var cv = $('#c')
 
         aiki.cx = cv[0].getContext('2d')
+        aiki.invalidateColorDisplay = aiki.adaptiveUpdater(aiki.updateColorDisplay)
+        aiki.invalidateImage = aiki.adaptiveUpdater(aiki.redraw)
+        aiki.updateStroke = aiki.adaptiveUpdater(aiki.drawWithStroke)
 
         cv
         .mousedown(aiki.mouseDownHandler)
@@ -109,20 +55,23 @@ var aiki =
 
         if (localStorage.currentDrawing) {
           aiki.drawing = JSON.parse(localStorage.currentDrawing)
+        } else {
+          aiki.runAndSave('crgb(128,128,255)')
+          aiki.runAndSave('a0.5')
+          aiki.runAndSave('s8')
         }
-        aiki.redraw()
+
+        aiki.invalidateImage.callback()
         aiki.saveDrawing()
       }
 
     , mouseDownHandler: function(ev) {
         ev.preventDefault()
-        aiki.strokeStart = new Date()
+        aiki.strokeTimer = aiki.timer()
         aiki.drawPos = aiki.evPos(ev)
-
-        var cv = aiki.cx.canvas
-        aiki.snapshot = aiki.cx.getImageData(0, 0, cv.width, cv.height)
         aiki.currentStroke = [aiki.drawPos.x, aiki.drawPos.y]
-        aiki.drawWithStroke()
+        aiki.drawDot(aiki.drawPos.x, aiki.drawPos.y)
+        aiki.updateStroke()
       }
 
     , mouseUpHandler: function() {
@@ -130,7 +79,7 @@ var aiki =
 
         // Crudely measure performance.
         if (window.console) {
-          var strokeTime = new Date().getTime() - aiki.strokeStart.getTime()
+          var strokeTime = aiki.strokeTimer.elapsedMs()
             , dn = aiki.currentStroke.length/2 -1
           console.log('drew '+dn+' segments in '+strokeTime+' ms for Hz='
                      + Math.round(dn/strokeTime*1000)
@@ -139,11 +88,12 @@ var aiki =
 
         aiki.drawPos = null
         aiki.cx.putImageData(aiki.snapshot, 0, 0)
-        delete aiki.snapshot
 
         // Convert current stroke into a line command.
         aiki.runAndSave("L"+aiki.currentStroke.join(' '))
-        delete aiki.currentStroke
+        aiki.currentStroke = null
+
+        aiki.takeSnapshot()
 
         aiki.saveDrawing()
       }
@@ -163,12 +113,27 @@ var aiki =
         aiki.currentStroke.push(newPos.x)
         aiki.currentStroke.push(newPos.y)
 
-        aiki.drawPos = newPos
+        // Approximate feedback until updateStroke() catches up:
+        aiki.drawStroke([oldPos.x, oldPos.y, newPos.x, newPos.y])
 
-        aiki.drawWithStroke()
+        aiki.updateStroke()
+
+        aiki.drawPos = newPos
+      }
+
+    , timer: function() {
+        return { start: new Date()
+               , elapsedMs: function() {
+                   return new Date().getTime() - this.start.getTime()
+                 }
+               }
       }
 
     , drawWithStroke: function() {
+        if (!aiki.currentStroke) return
+        // In Firefox 3.6.11 on my netbook, this putImageData takes
+        // about 74ms!  That's why this function is called from an
+        // adaptiveUpdater.  takeSnapshot() is even slower, at 94ms.
         aiki.cx.putImageData(aiki.snapshot, 0, 0)
         aiki.drawStroke(aiki.currentStroke)
       }
@@ -182,6 +147,23 @@ var aiki =
     , manhattanDistance: function(a, b) {
         return (Math.abs(a.x - b.x) +
                 Math.abs(a.y - b.y))
+      }
+
+    , adaptiveUpdater: function(ff) {
+        var timeout = null
+          , invoke = function() {
+              if (!timeout) timeout = setTimeout(invoke.callback, invoke.tt)
+            }
+
+        invoke.tt = 1
+        invoke.callback = function() {
+          timeout = null
+          var timer = aiki.timer()
+          ff()
+          invoke.tt = Math.max(1, invoke.tt * 0.9, 2 * timer.elapsedMs())
+        }
+
+        return invoke
       }
 
     , keyHandler: function(ev) {
@@ -231,13 +213,13 @@ var aiki =
 
         var command = aiki.drawing.pop()
         aiki.redoStack.push(command)
-        if (aiki.pendingRedraw) clearTimeout(aiki.pendingRedraw)
-        aiki.pendingRedraw = setTimeout(aiki.redraw, 150)
+        aiki.invalidateImage()
       }
 
     , redo: function() {
         if (!aiki.redoStack.length) return
         aiki.runAndSave(aiki.redoStack.pop())
+        aiki.takeSnapshot()
       }
 
       // “Eyedropper” functionality
@@ -251,13 +233,12 @@ var aiki =
       }
 
     , redraw: function() {
-        var start = new Date()
+        var timer = aiki.timer()
           , cx = aiki.cx
 
         // Initialize some variables to their initial states.  Can’t
         // change these without changing the interpretation of past
         // drawings.
-        aiki.pendingRedraw = null
         aiki.setOpacity(1.0)
         aiki.setPenSize(1)
 
@@ -276,13 +257,21 @@ var aiki =
         cx.lineJoin = 'round'
 
         aiki.drawing.forEach(aiki.run)
+
+        aiki.takeSnapshot()
+
         // Crudely measure performance.
         if (window.console) {
           console.log( 'aikidraw redraw for '+aiki.drawing.length
                      + ' commands took ms: '
-                     + (new Date().getTime() - start.getTime())
+                     + timer.elapsedMs()
                      )
         }
+      }
+
+    , takeSnapshot: function() {
+        var cv = aiki.cx.canvas
+        aiki.snapshot = aiki.cx.getImageData(0, 0, cv.width, cv.height)
       }
 
     , runAndSave: function(command) {
@@ -307,31 +296,42 @@ var aiki =
       }
 
     , drawStroke: function(stroke) {
+        if (stroke.length === 2) {
+          aiki.drawDot(stroke[0], stroke[1])
+        } else {
+          var cx = aiki.cx
+          cx.beginPath()
+
+          cx.moveTo(stroke[0], stroke[1])
+          for (var ii = 2; ii < stroke.length; ii += 2) {
+            cx.lineTo(stroke[ii], stroke[ii+1])
+          }
+
+          cx.stroke()
+        }
+      }
+
+    , drawDot: function(x, y) {
         var cx = aiki.cx
         cx.beginPath()
-
-        cx.moveTo(stroke[0], stroke[1])
-        for (var ii = 2; ii < stroke.length; ii += 2) {
-          cx.lineTo(stroke[ii], stroke[ii+1])
-        }
-
-        cx.stroke()
+        cx.arc(x, y, aiki.penSize/2, 0, 2*Math.PI, false)
+        cx.fill()
       }
 
     , setColor: function(color) {
         aiki.cx.strokeStyle = aiki.cx.fillStyle = color
-        aiki.updateColorDisplay()
+        aiki.invalidateColorDisplay()
       }
 
     , setPenSize: function(penSize) {
         aiki.cx.lineWidth = aiki.penSize = +penSize
-        aiki.updateColorDisplay()
+        aiki.invalidateColorDisplay()
       }
 
     , setOpacity: function(opacity) {
         if (isNaN(+opacity)) opacity = 1.0
         aiki.opacity = aiki.cx.globalAlpha = +opacity
-        aiki.updateColorDisplay()
+        aiki.invalidateColorDisplay()
       }
 
     , updateColorDisplay: function() {
@@ -367,6 +367,9 @@ var aiki =
         cx.moveTo(Math.max(ww/8, mm), Math.min(hh*3/4, hh-mm))
         cx.lineTo(Math.min(ww*7/8, ww-mm), Math.max(hh/4, mm))
         cx.stroke()
+
+        // If there is a stroke being drawn, update it too.
+        aiki.updateStroke()
       }
 
     , saveDrawing: function() {
