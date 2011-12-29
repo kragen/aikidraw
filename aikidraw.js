@@ -44,7 +44,7 @@
 // D redraw color indicator to indicate opacity
 // D make eyedropper work properly with respect to alpha!
 // D remove no-longer-needed schema upgrade code
-// - replace `capo.` with `aiki.` in all the JS
+// D replace `capo.` with `aiki.` in all the JS
 // D prevent doubleclicks on canvas from selecting stuff
 // - handle window reflows correctly!
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
@@ -73,7 +73,7 @@
 // - display a moving colored translucent dot under the cursor
 // - rename “command“s to “action“s? or “changes” or “deltas”?
 
-var capo =
+var aiki =
     { drawPos: null
     , mousePos: { x: 0, y: 0 }
     , drawing: []
@@ -85,61 +85,61 @@ var capo =
         var cv = $('#c')
           , offset = cv.offset()
 
-        capo.cx = cv[0].getContext('2d')
-        capo.offsetTop = offset.top
-        capo.offsetLeft = offset.left
-        capo.width = cv[0].width
-        capo.height = cv[0].height
+        aiki.cx = cv[0].getContext('2d')
+        aiki.offsetTop = offset.top
+        aiki.offsetLeft = offset.left
+        aiki.width = cv[0].width
+        aiki.height = cv[0].height
 
         cv
         .mousedown(function(ev) {
             ev.preventDefault()
-            capo.drawPos = capo.evPos(ev)
+            aiki.drawPos = aiki.evPos(ev)
         })
-        .mousemove(capo.mouseMoveHandler)
+        .mousemove(aiki.mouseMoveHandler)
 
         $(document)
-        .keypress(capo.keyHandler)
+        .keypress(aiki.keyHandler)
         .mouseup(function() {
-          capo.drawPos = null
-          capo.saveDrawing()
+          aiki.drawPos = null
+          aiki.saveDrawing()
         })
 
         $('.colorbutton').click(function(ev) {
-          capo.runAndSave('c' + this.style.backgroundColor)
+          aiki.runAndSave('c' + this.style.backgroundColor)
         })
 
-        $('.switchToSmallerPen').click(capo.switchToSmallerPen)
-        $('.switchToLargerPen').click(capo.switchToLargerPen)
-        $('.decreaseOpacity').click(capo.decreaseOpacity)
-        $('.increaseOpacity').click(capo.increaseOpacity)
+        $('.switchToSmallerPen').click(aiki.switchToSmallerPen)
+        $('.switchToLargerPen').click(aiki.switchToLargerPen)
+        $('.decreaseOpacity').click(aiki.decreaseOpacity)
+        $('.increaseOpacity').click(aiki.increaseOpacity)
 
         if (localStorage.currentDrawing) {
-          capo.drawing = JSON.parse(localStorage.currentDrawing)
+          aiki.drawing = JSON.parse(localStorage.currentDrawing)
         }
-        capo.redraw()
+        aiki.redraw()
       }
 
     , mouseMoveHandler: function(ev) {
-        var newPos = capo.evPos(ev)
-        capo.mousePos = newPos
+        var newPos = aiki.evPos(ev)
+        aiki.mousePos = newPos
 
-        var oldPos = capo.drawPos
+        var oldPos = aiki.drawPos
         if (!oldPos) return
 
         // Very simple front-end drawing simplification: if the
         // mouse has moved zero or one pixels, that’s not
         // enough.  Hopefully this is useful and not annoying.
-        if (capo.manhattanDistance(oldPos, newPos) < 2) return
+        if (aiki.manhattanDistance(oldPos, newPos) < 2) return
 
         // Draw a line.
-        capo.runAndSave("L"+[oldPos.x, oldPos.y, newPos.x, newPos.y].join(" "))
-        capo.drawPos = newPos
+        aiki.runAndSave("L"+[oldPos.x, oldPos.y, newPos.x, newPos.y].join(" "))
+        aiki.drawPos = newPos
       }
 
     , evPos: function(ev) {
-        return { x: ev.pageX - capo.offsetLeft
-               , y: ev.pageY - capo.offsetTop
+        return { x: ev.pageX - aiki.offsetLeft
+               , y: ev.pageY - aiki.offsetTop
                }
       }
 
@@ -149,8 +149,8 @@ var capo =
       }
 
     , keyHandler: function(ev) {
-        var k = capo.keyMap[String.fromCharCode(ev.which)]
-        if (k) capo[k]()
+        var k = aiki.keyMap[String.fromCharCode(ev.which)]
+        if (k) aiki[k]()
       }
 
     , keyMap: { '[': 'switchToSmallerPen'
@@ -165,91 +165,91 @@ var capo =
               }
 
     , switchToSmallerPen: function() {
-        var idx = capo.penSizes.indexOf(capo.penSize)
+        var idx = aiki.penSizes.indexOf(aiki.penSize)
         // Do nothing if already at smallest pen size.
         if (idx === 0) return
         if (idx === -1) idx = 1 // Can’t happen!
         idx--
-        capo.runAndSave('s' + capo.penSizes[idx])
+        aiki.runAndSave('s' + aiki.penSizes[idx])
       }
 
     , switchToLargerPen: function() {
-        var idx = capo.penSizes.indexOf(capo.penSize)
-        if (idx === capo.penSizes.length - 1) return
+        var idx = aiki.penSizes.indexOf(aiki.penSize)
+        if (idx === aiki.penSizes.length - 1) return
         idx++
-        capo.runAndSave('s' + capo.penSizes[idx])
+        aiki.runAndSave('s' + aiki.penSizes[idx])
       }
 
     , increaseOpacity: function() {
-        var opacity = Math.min(1, capo.opacity + 0.125)
-        capo.runAndSave('a' + opacity)
+        var opacity = Math.min(1, aiki.opacity + 0.125)
+        aiki.runAndSave('a' + opacity)
       }
 
     , decreaseOpacity: function() {
-        var opacity = Math.max(0.125, capo.opacity - 0.125)
-        capo.runAndSave('a' + opacity)
+        var opacity = Math.max(0.125, aiki.opacity - 0.125)
+        aiki.runAndSave('a' + opacity)
       }
 
     , undo: function() {
-        if (!capo.drawing.length) return
+        if (!aiki.drawing.length) return
 
-        var command = capo.drawing.pop()
-        capo.redoStack.push(command)
-        if (capo.pendingRedraw) clearTimeout(capo.pendingRedraw)
-        capo.pendingRedraw = setTimeout(capo.redraw, 150)
+        var command = aiki.drawing.pop()
+        aiki.redoStack.push(command)
+        if (aiki.pendingRedraw) clearTimeout(aiki.pendingRedraw)
+        aiki.pendingRedraw = setTimeout(aiki.redraw, 150)
       }
 
     , redo: function() {
-        if (!capo.redoStack.length) return
-        capo.runAndSave(capo.redoStack.pop())
+        if (!aiki.redoStack.length) return
+        aiki.runAndSave(aiki.redoStack.pop())
       }
 
       // “Eyedropper” functionality
     , pickColorFromImage: function() {
-        var pix = capo.cx.getImageData(capo.mousePos.x, capo.mousePos.y, 1, 1)
+        var pix = aiki.cx.getImageData(aiki.mousePos.x, aiki.mousePos.y, 1, 1)
           , pd = pix.data
           , rgbstr = [pd[0], pd[1], pd[2]].join(',')
           , color = 'rgb('+rgbstr+')'
 
-        capo.runAndSave('c' + color)
+        aiki.runAndSave('c' + color)
       }
 
     , redraw: function() {
-        var cx = capo.cx
+        var cx = aiki.cx
 
         // Initialize some variables to their initial states.  Can’t
         // change these without changing the interpretation of past
         // drawings.
-        capo.pendingRedraw = null
-        capo.setOpacity(1.0)
-        capo.setPenSize(1)
+        aiki.pendingRedraw = null
+        aiki.setOpacity(1.0)
+        aiki.setPenSize(1)
 
         // Fill background with cream.  Assumes globalAlpha is already
         // 1.0.
         cx.fillStyle = '#E1B870'
-        cx.fillRect(0, 0, capo.width, capo.height)
+        cx.fillRect(0, 0, aiki.width, aiki.height)
 
         // This variable gets initialized after filling in the
         // background so that filling the background doesn’t result in
         // strokes possibly showing up as grey (depending on whether
         // we use fillStyle; at the moment we don’t).
-        capo.setColor('black')
+        aiki.setColor('black')
 
         cx.lineCap = 'round'
         cx.lineJoin = 'round'
 
-        capo.drawing.forEach(capo.run)
+        aiki.drawing.forEach(aiki.run)
       }
 
     , runAndSave: function(command) {
-        capo.run(command)
-        capo.drawing.push(command)
+        aiki.run(command)
+        aiki.drawing.push(command)
       }
 
     , run: function(command) {
-        var k = capo.commandMap[command.charAt(0)]
+        var k = aiki.commandMap[command.charAt(0)]
         if (!k) throw new Error(command)
-        capo[k](command.substr(1))
+        aiki[k](command.substr(1))
       }
 
     , commandMap: { L: 'drawLine'
@@ -259,7 +259,7 @@ var capo =
                   }
 
     , drawLine: function(args) {
-        var cx = capo.cx
+        var cx = aiki.cx
           , coords = args.split(/ /)
           , x0 = coords[0]
           , y0 = coords[1]
@@ -273,19 +273,19 @@ var capo =
       }
 
     , setColor: function(color) {
-        capo.cx.strokeStyle = capo.cx.fillStyle = color
-        capo.updateColorDisplay()
+        aiki.cx.strokeStyle = aiki.cx.fillStyle = color
+        aiki.updateColorDisplay()
       }
 
     , setPenSize: function(penSize) {
-        capo.cx.lineWidth = capo.penSize = +penSize
-        capo.updateColorDisplay()
+        aiki.cx.lineWidth = aiki.penSize = +penSize
+        aiki.updateColorDisplay()
       }
 
     , setOpacity: function(opacity) {
         if (isNaN(+opacity)) opacity = 1.0
-        capo.opacity = capo.cx.globalAlpha = +opacity
-        capo.updateColorDisplay()
+        aiki.opacity = aiki.cx.globalAlpha = +opacity
+        aiki.updateColorDisplay()
       }
 
     , updateColorDisplay: function() {
@@ -311,11 +311,11 @@ var capo =
         // Draw a jaunty diagonal line
 
         cx.lineCap = 'round'
-        cx.strokeStyle = capo.cx.strokeStyle
-        cx.lineWidth = capo.cx.lineWidth
-        cx.globalAlpha = capo.opacity
+        cx.strokeStyle = aiki.cx.strokeStyle
+        cx.lineWidth = aiki.cx.lineWidth
+        cx.globalAlpha = aiki.opacity
 
-        var mm = capo.cx.lineWidth / 2 // minimal margin
+        var mm = aiki.cx.lineWidth / 2 // minimal margin
 
         cx.beginPath()
         cx.moveTo(Math.max(ww/8, mm), Math.min(hh*3/4, hh-mm))
@@ -324,8 +324,8 @@ var capo =
       }
 
     , saveDrawing: function() {
-        localStorage.currentDrawing = JSON.stringify(capo.drawing)
+        localStorage.currentDrawing = JSON.stringify(aiki.drawing)
       }
     }
 
-$(capo.setup) // for some reason Firefox can't getElementById before DOMContentLoaded
+$(aiki.setup) // for some reason Firefox can't getElementById before DOMContentLoaded
