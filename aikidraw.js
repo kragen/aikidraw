@@ -71,6 +71,7 @@
 // - add timed replay
 // - record delays for replay
 // - display a moving colored translucent dot under the cursor
+// - rename “command“s to “action“s? or “changes” or “deltas”?
 
 var capo =
     { drawPos: null
@@ -91,7 +92,7 @@ var capo =
         capo.height = cv[0].height
 
         cv
-        .mousedown(function(ev) { 
+        .mousedown(function(ev) {
             ev.preventDefault()
             capo.drawPos = capo.evPos(ev)
         })
@@ -148,23 +149,22 @@ var capo =
       }
 
     , keyHandler: function(ev) {
-        var c = String.fromCharCode(ev.which)
-        if (c === '[') {
-          capo.switchToSmallerPen()
-        } else if (c === ']') {
-          capo.switchToLargerPen()
-        } else if (c === '>' || c === '.') {
-          capo.increaseOpacity()
-        } else if (c === '<' || c === ',') {
-          capo.decreaseOpacity()
-        } else if (c === 'z') {
-          capo.undo()
-        } else if (c === 'y') {
-          capo.redo()
-        } else if (c === 'e') {
-          capo.pickColorFromImage()
+        var k = capo.keyMap[String.fromCharCode(ev.which)]
+        if (k) {
+          capo[k]()
         }
       }
+
+    , keyMap: { '[': 'switchToSmallerPen'
+              , ']': 'switchToLargerPen'
+              , '>': 'increaseOpacity'
+              , '.': 'increaseOpacity'
+              , '<': 'decreaseOpacity'
+              , ',': 'decreaseOpacity'
+              , 'z': 'undo'
+              , 'y': 'redo'
+              , 'e': 'pickColorFromImage'
+              }
 
     , switchToSmallerPen: function() {
         var idx = capo.penSizes.indexOf(capo.penSize)
@@ -298,23 +298,23 @@ var capo =
       }
 
     , run: function(command) {
-        var type = command.charAt(0)
-          , args = command.substr(1)
-        if (type === 'L') {
-          capo.drawLine(args.split(/ /))
-        } else if (type === 'c') {
-          capo.setColor(args)
-        } else if (type === 's') {
-          capo.setPenSize(+args)
-        } else if (type === 'a') {
-          capo.setOpacity(+args)
-        } else {
+        var k = capo.commandMap[command.charAt(0)]
+        if (!k) {
           throw new Error(command)
         }
+
+        capo[k](command.substr(1))
       }
 
-    , drawLine: function(coords) {
+    , commandMap: { L: 'drawLine'
+                  , c: 'setColor'
+                  , s: 'setPenSize'
+                  , a: 'setOpacity'
+                  }
+
+    , drawLine: function(args) {
         var cx = capo.cx
+          , coords = args.split(/ /)
           , x0 = coords[0]
           , y0 = coords[1]
           , x1 = coords[2]
@@ -332,16 +332,16 @@ var capo =
       }
 
     , setPenSize: function(penSize) {
-        capo.cx.lineWidth = capo.penSize = penSize
+        capo.cx.lineWidth = capo.penSize = +penSize
         capo.updateColorDisplay()
       }
 
     , setOpacity: function(opacity) {
-        if (isNaN(opacity)) {
+        if (isNaN(+opacity)) {
           opacity = 1.0
         }
 
-        capo.opacity = capo.cx.globalAlpha = opacity
+        capo.opacity = capo.cx.globalAlpha = +opacity
         capo.updateColorDisplay()
       }
 
