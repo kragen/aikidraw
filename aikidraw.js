@@ -43,7 +43,7 @@
 // D redraw color indicator to indicate pen size
 // D redraw color indicator to indicate opacity
 // D make eyedropper work properly with respect to alpha!
-// - remove no-longer-needed schema upgrade code
+// D remove no-longer-needed schema upgrade code
 // - replace `capo.` with `aiki.` in all the JS
 // D prevent doubleclicks on canvas from selecting stuff
 // - handle window reflows correctly!
@@ -212,7 +212,6 @@ var capo =
 
     , redraw: function() {
         var cx = capo.cx
-          , drawing = capo.drawing
 
         // Initialize some variables to their initial states.  Can’t
         // change these without changing the interpretation of past
@@ -235,35 +234,7 @@ var capo =
         cx.lineCap = 'round'
         cx.lineJoin = 'round'
 
-        for (var ii = 0; ii < drawing.length; ii++) {
-          var command = drawing[ii]
-          // Determine whether we need to schema-migrate.  Current
-          // line command is like "L3 4 5 6"; previous version was
-          // [{x: 3, y: 4}, {x: 5, y: 6}]; version before that was
-          // [[3,4],[5,6]].
-          if (command.charAt) {
-            // No schema upgrade needed.
-          } else {
-            if (!command[0].x) {
-              command[0] = capo.upgradePoint(command[0])
-              command[1] = capo.upgradePoint(command[1])
-            }
-            // Now upgrade to the current format.
-            var p0 = command[0]
-              , p1 = command[1]
-
-            command = "L"+[p0.x, p0.y, p1.x, p1.y].join(" ")
-            drawing[ii] = command
-          }
-
-          capo.run(command)
-        }
-      }
-
-      // For drawings created in the first few hours of
-      // development.
-    , upgradePoint: function(point) {
-        return { x: point[0], y: point[1] }
+        capo.drawing.forEach(capo.run)
       }
 
     , runAndSave: function(command) {
