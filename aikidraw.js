@@ -30,11 +30,8 @@ var aiki =
         var cv = $('#c')
 
         aiki.cx = cv[0].getContext('2d')
-        aiki.invalidateColorDisplay =
-          aiki.deferredUpdater( aiki.updateColorDisplay
-                              , 50
-                              )
-        aiki.invalidateImage = aiki.deferredUpdater(aiki.redraw, 50)
+        aiki.invalidateColorDisplay = aiki.adaptiveUpdater(aiki.updateColorDisplay)
+        aiki.invalidateImage = aiki.adaptiveUpdater(aiki.redraw)
         aiki.updateStroke = aiki.adaptiveUpdater(aiki.drawWithStroke)
 
         cv
@@ -139,30 +136,21 @@ var aiki =
                 Math.abs(a.y - b.y))
       }
 
-    , deferredUpdater: function(ff, tt) {
-        var timeout = null
-          , callback = function() {
-              timeout = null
-              ff()
-            }
-          , invoke = function() {
-              if (timeout === null) timeout = setTimeout(callback, tt)
-            }
-        return invoke
-      }
-
     , adaptiveUpdater: function(ff) {
         var tt = 1
           , timeout = null
+
           , callback = function() {
               timeout = null
               var timer = aiki.timer()
               ff()
               tt = Math.max(1, tt * 0.9, 2 * timer.elapsedMs())
             }
+
           , invoke = function() {
               if (timeout === null) timeout = setTimeout(callback, tt)
             }
+
         return invoke
       }
 
