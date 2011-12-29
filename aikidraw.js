@@ -111,6 +111,7 @@ var aiki =
           aiki.drawing = JSON.parse(localStorage.currentDrawing)
         }
         aiki.redraw()
+        aiki.saveDrawing()
       }
 
     , mouseDownHandler: function(ev) {
@@ -370,6 +371,7 @@ var aiki =
 
     , saveDrawing: function() {
         localStorage.currentDrawing = JSON.stringify(aiki.drawing)
+        $('.saveas').attr('href', aiki.cx.canvas.toDataURL())
       }
     }
 
