@@ -129,6 +129,7 @@ var capo =
         // enough.  Hopefully this is useful and not annoying.
         if (capo.manhattanDistance(oldPos, newPos) < 2) return
 
+        // Draw a line.
         capo.runAndSave("L"+[oldPos.x, oldPos.y, newPos.x, newPos.y].join(" "))
         capo.drawPos = newPos
       }
