@@ -267,7 +267,7 @@ var aiki =
 
         // This variable gets initialized after filling in the
         // background so that filling the background doesn’t result in
-        // strokes possibly showing up as grey (depending on whether
+        // strokes possibly showing up as cream (depending on whether
         // we use fillStyle; at the moment we don’t).
         aiki.setColor('black')
 
