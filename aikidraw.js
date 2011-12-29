@@ -91,11 +91,6 @@ var aiki =
         aiki.saveDrawing()
       }
 
-    , takeSnapshot: function() {
-        var cv = aiki.cx.canvas
-        aiki.snapshot = aiki.cx.getImageData(0, 0, cv.width, cv.height)
-      }
-
     , mouseMoveHandler: function(ev) {
         var newPos = aiki.evPos(ev)
         aiki.mousePos = newPos
@@ -262,6 +257,11 @@ var aiki =
                      + timer.elapsedMs()
                      )
         }
+      }
+
+    , takeSnapshot: function() {
+        var cv = aiki.cx.canvas
+        aiki.snapshot = aiki.cx.getImageData(0, 0, cv.width, cv.height)
       }
 
     , runAndSave: function(command) {
