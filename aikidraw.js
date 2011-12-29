@@ -17,6 +17,7 @@
 // - do < > [ ] need to update the display of the current stroke?
 // - get performance to be acceptable again in Firefox
 // - make clicking (as opposed to dragging) make dots
+// - make timer object instead of new Date()
 
 var aiki =
     { drawPos: null
@@ -34,6 +35,7 @@ var aiki =
                               , 50
                               )
         aiki.invalidateImage = aiki.deferredUpdater(aiki.redraw, 50)
+        aiki.updateStroke = aiki.adaptiveUpdater(aiki.drawWithStroke)
 
         cv
         .mousedown(aiki.mouseDownHandler)
@@ -67,7 +69,7 @@ var aiki =
         var cv = aiki.cx.canvas
         aiki.snapshot = aiki.cx.getImageData(0, 0, cv.width, cv.height)
         aiki.currentStroke = [aiki.drawPos.x, aiki.drawPos.y]
-        aiki.drawWithStroke()
+        aiki.updateStroke()
       }
 
     , mouseUpHandler: function() {
@@ -84,12 +86,9 @@ var aiki =
 
         aiki.drawPos = null
         aiki.cx.putImageData(aiki.snapshot, 0, 0)
-        delete aiki.snapshot
 
         // Convert current stroke into a line command.
         aiki.runAndSave("L"+aiki.currentStroke.join(' '))
-        delete aiki.currentStroke
-
         aiki.saveDrawing()
       }
 
@@ -108,9 +107,12 @@ var aiki =
         aiki.currentStroke.push(newPos.x)
         aiki.currentStroke.push(newPos.y)
 
-        aiki.drawPos = newPos
+        // Approximate feedback until updateStroke() catches up:
+        aiki.drawStroke([oldPos.x, oldPos.y, newPos.x, newPos.y])
 
-        aiki.drawWithStroke()
+        aiki.updateStroke()
+
+        aiki.drawPos = newPos
       }
 
     , drawWithStroke: function() {
@@ -131,11 +133,27 @@ var aiki =
 
     , deferredUpdater: function(ff, tt) {
         var timeout = null
-        var callback = function() {
+          , callback = function() {
               timeout = null
               ff()
             }
-        var invoke = function() {
+          , invoke = function() {
+              if (timeout === null) timeout = setTimeout(callback, tt)
+            }
+        return invoke
+      }
+
+    , adaptiveUpdater: function(ff) {
+        var tt = 1
+          , timeout = null
+          , callback = function() {
+              timeout = null
+              var start = new Date()
+              ff()
+              var duration = new Date().getTime() - start.getTime()
+              tt = Math.max(1, tt * 0.9, 2 * duration)
+            }
+          , invoke = function() {
               if (timeout === null) timeout = setTimeout(callback, tt)
             }
         return invoke
