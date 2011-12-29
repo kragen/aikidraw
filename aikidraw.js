@@ -1,4 +1,7 @@
 // TODO:
+// D get performance to be acceptable again in Firefox
+// D make clicking (as opposed to dragging) make dots
+// D make timer object instead of new Date()
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
 //   512x512 is a meg of memory down the drain, so we probably don’t
 //   want to save more than about 30 of those snapshots.  (Although
@@ -15,9 +18,7 @@
 // - rename “command“s to “action“s? or “changes” or “deltas”?
 //   Prevayler calls them “commands”...
 // - do < > [ ] need to update the display of the current stroke?
-// D get performance to be acceptable again in Firefox
-// D make clicking (as opposed to dragging) make dots
-// D make timer object instead of new Date()
+// - rename unclearly-labeled functions. drawWithStroke!?
 
 var aiki =
     { drawPos: null
@@ -54,7 +55,7 @@ var aiki =
         if (localStorage.currentDrawing) {
           aiki.drawing = JSON.parse(localStorage.currentDrawing)
         }
-        aiki.redraw()
+        aiki.invalidateImage()
         aiki.saveDrawing()
       }
 
@@ -62,9 +63,6 @@ var aiki =
         ev.preventDefault()
         aiki.strokeTimer = aiki.timer()
         aiki.drawPos = aiki.evPos(ev)
-
-        var cv = aiki.cx.canvas
-        aiki.snapshot = aiki.cx.getImageData(0, 0, cv.width, cv.height)
         aiki.currentStroke = [aiki.drawPos.x, aiki.drawPos.y]
         aiki.updateStroke()
       }
@@ -86,7 +84,16 @@ var aiki =
 
         // Convert current stroke into a line command.
         aiki.runAndSave("L"+aiki.currentStroke.join(' '))
+        aiki.currentStroke = null
+
+        aiki.takeSnapshot()
+
         aiki.saveDrawing()
+      }
+
+    , takeSnapshot: function() {
+        var cv = aiki.cx.canvas
+        aiki.snapshot = aiki.cx.getImageData(0, 0, cv.width, cv.height)
       }
 
     , mouseMoveHandler: function(ev) {
@@ -121,6 +128,7 @@ var aiki =
       }
 
     , drawWithStroke: function() {
+        if (!aiki.currentStroke) return
         aiki.cx.putImageData(aiki.snapshot, 0, 0)
         aiki.drawStroke(aiki.currentStroke)
       }
@@ -147,7 +155,7 @@ var aiki =
             }
 
           , invoke = function() {
-              if (timeout === null) timeout = setTimeout(callback, invoke.tt)
+              if (!timeout) timeout = setTimeout(callback, invoke.tt)
             }
 
         invoke.tt = 1
@@ -208,6 +216,7 @@ var aiki =
     , redo: function() {
         if (!aiki.redoStack.length) return
         aiki.runAndSave(aiki.redoStack.pop())
+        aiki.takeSnapshot()
       }
 
       // “Eyedropper” functionality
@@ -245,6 +254,9 @@ var aiki =
         cx.lineJoin = 'round'
 
         aiki.drawing.forEach(aiki.run)
+
+        aiki.takeSnapshot()
+
         // Crudely measure performance.
         if (window.console) {
           console.log( 'aikidraw redraw for '+aiki.drawing.length
