@@ -308,10 +308,7 @@ var capo =
       }
 
     , setOpacity: function(opacity) {
-        if (isNaN(+opacity)) {
-          opacity = 1.0
-        }
-
+        if (isNaN(+opacity)) opacity = 1.0
         capo.opacity = capo.cx.globalAlpha = +opacity
         capo.updateColorDisplay()
       }
