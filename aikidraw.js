@@ -137,19 +137,20 @@ var aiki =
       }
 
     , adaptiveUpdater: function(ff) {
-        var tt = 1
-          , timeout = null
+        var timeout = null
 
           , callback = function() {
               timeout = null
               var timer = aiki.timer()
               ff()
-              tt = Math.max(1, tt * 0.9, 2 * timer.elapsedMs())
+              invoke.tt = Math.max(1, invoke.tt * 0.9, 2 * timer.elapsedMs())
             }
 
           , invoke = function() {
-              if (timeout === null) timeout = setTimeout(callback, tt)
+              if (timeout === null) timeout = setTimeout(callback, invoke.tt)
             }
+
+        invoke.tt = 1
 
         return invoke
       }
