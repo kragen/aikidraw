@@ -55,7 +55,12 @@ var aiki =
 
         if (localStorage.currentDrawing) {
           aiki.drawing = JSON.parse(localStorage.currentDrawing)
+        } else {
+          aiki.runAndSave('crgb(128,128,255)')
+          aiki.runAndSave('a0.5')
+          aiki.runAndSave('s8')
         }
+
         aiki.invalidateImage.callback()
         aiki.saveDrawing()
       }
