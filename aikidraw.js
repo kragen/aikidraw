@@ -100,7 +100,10 @@ var capo =
 
         $(document)
         .keypress(capo.keyHandler)
-        .mouseup(function() { capo.drawPos = null; capo.saveDrawing() })
+        .mouseup(function() {
+          capo.drawPos = null
+          capo.saveDrawing()
+        })
 
         $('.colorbutton').click(function(ev) {
           capo.runAndSave('c' + this.style.backgroundColor)
@@ -240,7 +243,7 @@ var capo =
 
     , runAndSave: function(command) {
         capo.run(command)
-        capo.saveCommand(command)
+        capo.drawing.push(command)
       }
 
     , run: function(command) {
@@ -318,10 +321,6 @@ var capo =
         cx.moveTo(Math.max(ww/8, mm), Math.min(hh*3/4, hh-mm))
         cx.lineTo(Math.min(ww*7/8, ww-mm), Math.max(hh/4, mm))
         cx.stroke()
-      }
-
-    , saveCommand: function(command) {
-        capo.drawing.push(command)
       }
 
     , saveDrawing: function() {
