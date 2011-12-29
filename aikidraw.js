@@ -45,7 +45,7 @@
 // D make eyedropper work properly with respect to alpha!
 // - remove no-longer-needed schema upgrade code
 // - replace `capo.` with `aiki.` in all the JS
-// - prevent doubleclicks on canvas from selecting stuff
+// D prevent doubleclicks on canvas from selecting stuff
 // - handle window reflows correctly!
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
 //   512x512 is a meg of memory down the drain, so we probably don’t
@@ -91,15 +91,17 @@ var capo =
         capo.height = cv[0].height
 
         cv
-        .mousedown(function(ev) { capo.drawPos = capo.evPos(ev) })
+        .mousedown(function(ev) { 
+            ev.preventDefault()
+            capo.drawPos = capo.evPos(ev)
+        })
         .mousemove(capo.mouseMoveHandler)
 
         $(document)
         .keypress(capo.keyHandler)
         .mouseup(function() { capo.drawPos = null; capo.saveDrawing() })
 
-        $('.colorbutton')
-        .click(function(ev) {
+        $('.colorbutton').click(function(ev) {
           capo.runAndSave('c' + this.style.backgroundColor)
         })
 
