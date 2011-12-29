@@ -42,7 +42,7 @@
 // D add buttons to change pen size
 // D redraw color indicator to indicate pen size
 // D redraw color indicator to indicate opacity
-// - make eyedropper work properly with respect to alpha!
+// D make eyedropper work properly with respect to alpha!
 // - prevent doubleclicks on canvas from selecting stuff
 // - handle window reflows correctly!
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
@@ -233,17 +233,29 @@ var capo =
       }
 
     , redraw: function() {
-        capo.pendingRedraw = null
-        capo.setPenSize(1)
-        capo.setColor('black')
-        capo.setOpacity(1.0)
-
         var cx = capo.cx
           , drawing = capo.drawing
 
+        // Initialize some variables to their initial states.  Can’t
+        // change these without changing the interpretation of past
+        // drawings.
+        capo.pendingRedraw = null
+        capo.setOpacity(1.0)
+        capo.setPenSize(1)
+
+        // Fill background with grey.  Assumes globalAlpha is already
+        // 1.0.
+        cx.fillStyle = 'grey'
+        cx.fillRect(0, 0, capo.width, capo.height)
+
+        // This variable gets initialized after filling in the
+        // background so that filling the background doesn’t result in
+        // strokes possibly showing up as grey (depending on whether
+        // we use fillStyle; at the moment we don’t).
+        capo.setColor('black')
+
         cx.lineCap = 'round'
         cx.lineJoin = 'round'
-        cx.clearRect(0, 0, capo.width, capo.height)
 
         for (var ii = 0; ii < drawing.length; ii++) {
           var command = drawing[ii]
