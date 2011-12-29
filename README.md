@@ -7,4 +7,4 @@ architecture.
 At this point, it’s barely possible to ues it to create worthwhile
 drawings.  Try <http://kragen.github.com/aikidraw/aikidraw.html>.
 
-![](./screenshot.png "A picture drawn by SMWS with an earlier version")
+![](screenshot.png "A picture drawn by SMWS with an earlier version")
