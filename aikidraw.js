@@ -55,7 +55,7 @@ var aiki =
         if (localStorage.currentDrawing) {
           aiki.drawing = JSON.parse(localStorage.currentDrawing)
         }
-        aiki.invalidateImage()
+        aiki.invalidateImage.callback()
         aiki.saveDrawing()
       }
 
@@ -146,19 +146,17 @@ var aiki =
 
     , adaptiveUpdater: function(ff) {
         var timeout = null
-
-          , callback = function() {
-              timeout = null
-              var timer = aiki.timer()
-              ff()
-              invoke.tt = Math.max(1, invoke.tt * 0.9, 2 * timer.elapsedMs())
-            }
-
           , invoke = function() {
-              if (!timeout) timeout = setTimeout(callback, invoke.tt)
+              if (!timeout) timeout = setTimeout(invoke.callback, invoke.tt)
             }
 
         invoke.tt = 1
+        invoke.callback = function() {
+          timeout = null
+          var timer = aiki.timer()
+          ff()
+          invoke.tt = Math.max(1, invoke.tt * 0.9, 2 * timer.elapsedMs())
+        }
 
         return invoke
       }
