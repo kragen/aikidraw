@@ -1,76 +1,11 @@
 // TODO:
-// D draw lines with mouse
-// D fix it so it works in Firefox
-// D store lines in localStorage
-// D namespace everything
-// D add different colors
-//   D make drawing be a list of line-drawing instructions instead of
-//     a list of lines
-//   D add two color change buttons (black and white) in HTML
-//   D add some more of them
-//   D make them change the drawing color
-//   D add color change instruction so that color change can be saved
-//     D add a runAndSave function and use it for lines
-//     D make colorbutton click handler call it too
-//   D add current color indicator area
-// D reorganize code
-// D add different thicknesses (exponential pen sizes?)
-//   D basic addition done
-//   D circular pens
-// D add different opacities
-//   D added basic opacity, but now need to
-// D find out how to get image data from the canvas, needed for two
-//   things: the e eyedropper color picker, and faster redraws after
-//   undo or editing an existing stroke.  I *could* use
-//   canvas.toDataURL to take snapshots but I’d rather not.  Aha,
-//   getImageData() returns a snapshot, putImageData(snapshot, 0, 0)
-//   restores, and the imagedata itself is an RGBA 8-bit array on the
-//   property .data.
-// D add undo
-// D add redo
-// D make keys work in Firefox!  WTF is wrong?  oh, you have to listen
-//   on document, not document.body, for unfocused keypresses.
-// D add eyedropper color picker
-// D fix mouseup in the rest of the document
-// D add keyboard shortcuts: e for picking color from under the mouse,
-//   z for undo, y for redo, [ for smaller brush, ] for larger brush,
-//   < to increase opacity, > to decrease opacity
-// D use , penSizes: [ 1, 2, 4, 8, 16, 32, 64, 128 ]
-// D opacity controls backwards; fix them. allow , and . instead of < and >
-// D don't go fully transparent
-// D quickly kludge out the save-on-mouse-up thing
-// D add buttons to change pen size
-// D redraw color indicator to indicate pen size
-// D redraw color indicator to indicate opacity
-// D make eyedropper work properly with respect to alpha!
-// D remove no-longer-needed schema upgrade code
-// D replace `capo.` with `aiki.` in all the JS
-// D prevent doubleclicks on canvas from selecting stuff
-// D handle window reflows correctly!
-// D does undo need to updateColorDisplay?  Hmm, looks like it
-//   effectively already does; could I maybe get faster redraws by not
-//   doing that?  I'm getting 1300ms for 7458 commands at the moment,
-//   and if updateColorDisplay returns immediately that goes down to
-//   730.  Deferring those updates makes redraw run twice as fast.
-// D see if there is another setTimeout that should use deferredUpdater
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
 //   512x512 is a meg of memory down the drain, so we probably don’t
 //   want to save more than about 30 of those snapshots.  (Although
-//   a PNG from .toDataURL() was only 215K.)   This will
-//   enable the stroke drawing code to be totally revamped so that
-//   you’re drawing entire multi-line strokes instead of bunches of
-//   individual lines, which will also accomplish the following:
-//   D make undo undo more than a single pixel’s worth at a time
-//   D make undo reasonably efficient on large drawings
-//   D cut storage requirements by a factor of 2 or 3
-// D totally revamp stroke drawing code to stop putting blots in the
-//   middle of translucent lines.  Technically for this I only need a
-//   single snapshot.
-// D add buttons to change opacity
+//   a PNG from .toDataURL() was only 215K.)
 // - save redo stack persistently!
 // - make lines long enough to be sensibly antialiased
 // - make localStorage linear-time
-// D make localStorage memory-efficient
 // - add triangle/circle color picker
 // - add keyboard shortcut: p for a palette
 // - write a server-side so sketches can be shared
