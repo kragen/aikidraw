@@ -47,7 +47,12 @@
 // D replace `capo.` with `aiki.` in all the JS
 // D prevent doubleclicks on canvas from selecting stuff
 // D handle window reflows correctly!
-// - does undo need to updateColorDisplay?
+// D does undo need to updateColorDisplay?  Hmm, looks like it
+//   effectively already does; could I maybe get faster redraws by not
+//   doing that?  I'm getting 1300ms for 7458 commands at the moment,
+//   and if updateColorDisplay returns immediately that goes down to
+//   730.  Deferring those updates makes redraw run twice as fast.
+// - see if there is another setTieout that should use deferredUpdater
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
 //   512x512 is a meg of memory down the drain, so we probably don’t
 //   want to save more than about 30 of those snapshots.  (Although
@@ -65,7 +70,7 @@
 // - save redo stack persistently!
 // - make lines long enough to be sensibly antialiased
 // - make localStorage linear-time
-// - make localStorage memory-efficient
+// D make localStorage memory-efficient
 // - add triangle/circle color picker
 // - add keyboard shortcut: p for a palette
 // - write a server-side so sketches can be shared
@@ -73,6 +78,7 @@
 // - record delays for replay
 // - display a moving colored translucent dot under the cursor
 // - rename “command“s to “action“s? or “changes” or “deltas”?
+//   Prevayler calls them “commands”...
 // - do < > [ ] need to update the display of the current stroke?
 // - get performance to be acceptable again in Firefox
 // - make clicking (as opposed to dragging) make dots
@@ -89,6 +95,10 @@ var aiki =
         var cv = $('#c')
 
         aiki.cx = cv[0].getContext('2d')
+        aiki.invalidateColorDisplay =
+          aiki.deferredUpdater( aiki.updateColorDisplay
+                              , 50
+                              )
 
         cv
         .mousedown(aiki.mouseDownHandler)
@@ -181,6 +191,18 @@ var aiki =
     , manhattanDistance: function(a, b) {
         return (Math.abs(a.x - b.x) +
                 Math.abs(a.y - b.y))
+      }
+
+    , deferredUpdater: function(ff, tt) {
+        var timeout = null
+        var callback = function() {
+              timeout = null
+              ff()
+            }
+        var invoke = function() {
+              if (timeout === null) timeout = setTimeout(callback, tt)
+            }
+        return invoke
       }
 
     , keyHandler: function(ev) {
@@ -319,18 +341,18 @@ var aiki =
 
     , setColor: function(color) {
         aiki.cx.strokeStyle = aiki.cx.fillStyle = color
-        aiki.updateColorDisplay()
+        aiki.invalidateColorDisplay()
       }
 
     , setPenSize: function(penSize) {
         aiki.cx.lineWidth = aiki.penSize = +penSize
-        aiki.updateColorDisplay()
+        aiki.invalidateColorDisplay()
       }
 
     , setOpacity: function(opacity) {
         if (isNaN(+opacity)) opacity = 1.0
         aiki.opacity = aiki.cx.globalAlpha = +opacity
-        aiki.updateColorDisplay()
+        aiki.invalidateColorDisplay()
       }
 
     , updateColorDisplay: function() {
