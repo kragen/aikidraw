@@ -16,7 +16,7 @@
 //   Prevayler calls them “commands”...
 // - do < > [ ] need to update the display of the current stroke?
 // D get performance to be acceptable again in Firefox
-// - make clicking (as opposed to dragging) make dots
+// D make clicking (as opposed to dragging) make dots
 // D make timer object instead of new Date()
 
 var aiki =
@@ -279,12 +279,23 @@ var aiki =
         var cx = aiki.cx
         cx.beginPath()
 
-        cx.moveTo(stroke[0], stroke[1])
-        for (var ii = 2; ii < stroke.length; ii += 2) {
-          cx.lineTo(stroke[ii], stroke[ii+1])
-        }
+        if (stroke.length === 2) {
+          aiki.drawDot(stroke[0], stroke[1])
+        } else {
+          cx.moveTo(stroke[0], stroke[1])
+          for (var ii = 2; ii < stroke.length; ii += 2) {
+            cx.lineTo(stroke[ii], stroke[ii+1])
+          }
 
-        cx.stroke()
+          cx.stroke()
+        }
+      }
+
+    , drawDot: function(x, y) {
+        var cx = aiki.cx
+        cx.beginPath()
+        cx.arc(x, y, aiki.penSize/2, 0, 2*Math.PI, false)
+        cx.fill()
       }
 
     , setColor: function(color) {
