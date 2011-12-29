@@ -20,6 +20,9 @@
 // D do < > [ ] need to update the display of the current stroke?
 // - rename unclearly-labeled functions. drawWithStroke!?
 // - move brush redrawing above image redrawing to preserve top-down-ness
+// - handle touchmove events so that you can paint on Android
+// - add undo/redo buttons
+// - add eyedropper button
 
 var aiki =
     { drawPos: null
