@@ -124,11 +124,6 @@ var aiki =
         aiki.drawWithStroke()
       }
 
-    , drawWithStroke: function() {
-        aiki.cx.putImageData(aiki.snapshot, 0, 0)
-        aiki.drawStroke(aiki.currentStroke)
-      }
-
     , mouseUpHandler: function() {
         if (!aiki.drawPos) return
 
@@ -170,6 +165,11 @@ var aiki =
         aiki.drawPos = newPos
 
         aiki.drawWithStroke()
+      }
+
+    , drawWithStroke: function() {
+        aiki.cx.putImageData(aiki.snapshot, 0, 0)
+        aiki.drawStroke(aiki.currentStroke)
       }
 
     , evPos: function(ev) {
