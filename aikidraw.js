@@ -46,7 +46,7 @@
 // D remove no-longer-needed schema upgrade code
 // D replace `capo.` with `aiki.` in all the JS
 // D prevent doubleclicks on canvas from selecting stuff
-// - handle window reflows correctly!
+// D handle window reflows correctly!
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
 //   512x512 is a meg of memory down the drain, so we probably don’t
 //   want to save more than about 30 of those snapshots.  (Although
@@ -83,27 +83,16 @@ var aiki =
 
     , setup: function() {
         var cv = $('#c')
-          , offset = cv.offset()
 
         aiki.cx = cv[0].getContext('2d')
-        aiki.offsetTop = offset.top
-        aiki.offsetLeft = offset.left
-        aiki.width = cv[0].width
-        aiki.height = cv[0].height
 
         cv
-        .mousedown(function(ev) {
-            ev.preventDefault()
-            aiki.drawPos = aiki.evPos(ev)
-        })
+        .mousedown(aiki.mouseDownHandler)
         .mousemove(aiki.mouseMoveHandler)
 
         $(document)
         .keypress(aiki.keyHandler)
-        .mouseup(function() {
-          aiki.drawPos = null
-          aiki.saveDrawing()
-        })
+        .mouseup(aiki.mouseUpHandler)
 
         $('.colorbutton').click(function(ev) {
           aiki.runAndSave('c' + this.style.backgroundColor)
@@ -118,6 +107,25 @@ var aiki =
           aiki.drawing = JSON.parse(localStorage.currentDrawing)
         }
         aiki.redraw()
+      }
+
+    , mouseDownHandler: function(ev) {
+        ev.preventDefault()
+        aiki.strokeStart = { time: new Date(), n: aiki.drawing.length }
+        aiki.drawPos = aiki.evPos(ev)
+      }
+
+    , mouseUpHandler: function() {
+        // Crudely measure performance.
+        if (window.console) {
+          var strokeTime = new Date().getTime() - aiki.strokeStart.time.getTime()
+            , dn = aiki.drawing.length - aiki.strokeStart.n
+          console.log('drew '+dn+' segments in '+strokeTime+' ms for Hz='
+                     + Math.round(dn/strokeTime*1000))
+        }
+
+        aiki.drawPos = null
+        aiki.saveDrawing()
       }
 
     , mouseMoveHandler: function(ev) {
@@ -138,8 +146,8 @@ var aiki =
       }
 
     , evPos: function(ev) {
-        return { x: ev.pageX - aiki.offsetLeft
-               , y: ev.pageY - aiki.offsetTop
+        return { x: ev.pageX - aiki.cx.canvas.offsetLeft
+               , y: ev.pageY - aiki.cx.canvas.offsetTop
                }
       }
 
@@ -215,7 +223,8 @@ var aiki =
       }
 
     , redraw: function() {
-        var cx = aiki.cx
+        var start = new Date()
+          , cx = aiki.cx
 
         // Initialize some variables to their initial states.  Can’t
         // change these without changing the interpretation of past
@@ -227,7 +236,7 @@ var aiki =
         // Fill background with cream.  Assumes globalAlpha is already
         // 1.0.
         cx.fillStyle = '#E1B870'
-        cx.fillRect(0, 0, aiki.width, aiki.height)
+        cx.fillRect(0, 0, aiki.cx.canvas.width, aiki.cx.canvas.height)
 
         // This variable gets initialized after filling in the
         // background so that filling the background doesn’t result in
@@ -239,6 +248,10 @@ var aiki =
         cx.lineJoin = 'round'
 
         aiki.drawing.forEach(aiki.run)
+        // Crudely measure performance.
+        if (window.console) {
+          console.log('aikidraw redraw for '+aiki.drawing.length+' commands took ms: ' + (new Date().getTime() - start.getTime()))
+        }
       }
 
     , runAndSave: function(command) {
