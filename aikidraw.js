@@ -72,6 +72,10 @@
 // - record delays for replay
 // - display a moving colored translucent dot under the cursor
 // - rename “command“s to “action“s? or “changes” or “deltas”?
+// - does undo need to updateColorDisplay?
+// - do < > [ ] need to update the display of the current stroke?
+// - get performance to be acceptable again in Firefox
+// - make clicking (as opposed to dragging) make dots
 
 var aiki =
     { drawPos: null
