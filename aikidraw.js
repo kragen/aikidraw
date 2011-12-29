@@ -43,6 +43,8 @@
 // D redraw color indicator to indicate pen size
 // D redraw color indicator to indicate opacity
 // D make eyedropper work properly with respect to alpha!
+// - remove no-longer-needed schema upgrade code
+// - replace `capo.` with `aiki.` in all the JS
 // - prevent doubleclicks on canvas from selecting stuff
 // - handle window reflows correctly!
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
@@ -243,9 +245,9 @@ var capo =
         capo.setOpacity(1.0)
         capo.setPenSize(1)
 
-        // Fill background with grey.  Assumes globalAlpha is already
+        // Fill background with cream.  Assumes globalAlpha is already
         // 1.0.
-        cx.fillStyle = 'grey'
+        cx.fillStyle = '#FFE999'
         cx.fillRect(0, 0, capo.width, capo.height)
 
         // This variable gets initialized after filling in the
