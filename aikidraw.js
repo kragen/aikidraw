@@ -42,6 +42,9 @@
 // D add buttons to change pen size
 // D redraw color indicator to indicate pen size
 // D redraw color indicator to indicate opacity
+// - make eyedropper work properly with respect to alpha!
+// - prevent doubleclicks on canvas from selecting stuff
+// - handle window reflows correctly!
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
 //   512x512 is a meg of memory down the drain, so we probably don’t
 //   want to save more than about 30 of those snapshots.  (Although
@@ -51,12 +54,12 @@
 //   individual lines, which will also accomplish the following:
 //   - make undo undo more than a single pixel’s worth at a time
 //   - make undo reasonably efficient on large drawings
-//   - totally revamp stroke drawing code to stop putting blots in the
-//     middle of translucent lines.
 //   - cut storage requirements by a factor of 2 or 3
+// - totally revamp stroke drawing code to stop putting blots in the
+//   middle of translucent lines.  Technically for this I only need a
+//   single snapshot.
 // D add buttons to change opacity
 // - save redo stack persistently!
-// - make eyedropper work properly with respect to alpha!
 // - make lines long enough to be sensibly antialiased
 // - make localStorage linear-time
 // - make localStorage memory-efficient
@@ -65,9 +68,7 @@
 // - write a server-side so sketches can be shared
 // - add timed replay
 // - record delays for replay
-// - handle window reflows correctly!
 // - display a moving colored translucent dot under the cursor
-// - prevent doubleclicks on canvas from selecting stuff
 
 var capo =
     { drawPos: null
