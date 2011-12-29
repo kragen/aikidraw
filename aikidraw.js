@@ -17,7 +17,7 @@
 // - display a moving colored translucent dot under the cursor
 // - rename “command“s to “action“s? or “changes” or “deltas”?
 //   Prevayler calls them “commands”...
-// - do < > [ ] need to update the display of the current stroke?
+// D do < > [ ] need to update the display of the current stroke?
 // - rename unclearly-labeled functions. drawWithStroke!?
 
 var aiki =
@@ -357,6 +357,9 @@ var aiki =
         cx.moveTo(Math.max(ww/8, mm), Math.min(hh*3/4, hh-mm))
         cx.lineTo(Math.min(ww*7/8, ww-mm), Math.max(hh/4, mm))
         cx.stroke()
+
+        // If there is a stroke being drawn, update it too.
+        aiki.updateStroke()
       }
 
     , saveDrawing: function() {
