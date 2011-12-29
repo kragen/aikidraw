@@ -19,6 +19,7 @@
 //   Prevayler calls them “commands”...
 // D do < > [ ] need to update the display of the current stroke?
 // - rename unclearly-labeled functions. drawWithStroke!?
+// - move brush redrawing above image redrawing to preserve top-down-ness
 
 var aiki =
     { drawPos: null
@@ -64,6 +65,7 @@ var aiki =
         aiki.strokeTimer = aiki.timer()
         aiki.drawPos = aiki.evPos(ev)
         aiki.currentStroke = [aiki.drawPos.x, aiki.drawPos.y]
+        aiki.drawDot(aiki.drawPos.x, aiki.drawPos.y)
         aiki.updateStroke()
       }
 
@@ -286,12 +288,12 @@ var aiki =
       }
 
     , drawStroke: function(stroke) {
-        var cx = aiki.cx
-        cx.beginPath()
-
         if (stroke.length === 2) {
           aiki.drawDot(stroke[0], stroke[1])
         } else {
+          var cx = aiki.cx
+          cx.beginPath()
+
           cx.moveTo(stroke[0], stroke[1])
           for (var ii = 2; ii < stroke.length; ii += 2) {
             cx.lineTo(stroke[ii], stroke[ii+1])
