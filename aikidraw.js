@@ -118,10 +118,12 @@ var aiki =
     , mouseUpHandler: function() {
         // Crudely measure performance.
         if (window.console) {
-          var strokeTime = new Date().getTime() - aiki.strokeStart.time.getTime()
+          var strokeTime =
+                new Date().getTime() - aiki.strokeStart.time.getTime()
             , dn = aiki.drawing.length - aiki.strokeStart.n
           console.log('drew '+dn+' segments in '+strokeTime+' ms for Hz='
-                     + Math.round(dn/strokeTime*1000))
+                     + Math.round(dn/strokeTime*1000)
+                     )
         }
 
         aiki.drawPos = null
@@ -250,7 +252,10 @@ var aiki =
         aiki.drawing.forEach(aiki.run)
         // Crudely measure performance.
         if (window.console) {
-          console.log('aikidraw redraw for '+aiki.drawing.length+' commands took ms: ' + (new Date().getTime() - start.getTime()))
+          console.log( 'aikidraw redraw for '+aiki.drawing.length
+                     + ' commands took ms: '
+                     + (new Date().getTime() - start.getTime())
+                     )
         }
       }
 
