@@ -52,7 +52,7 @@
 //   doing that?  I'm getting 1300ms for 7458 commands at the moment,
 //   and if updateColorDisplay returns immediately that goes down to
 //   730.  Deferring those updates makes redraw run twice as fast.
-// - see if there is another setTieout that should use deferredUpdater
+// D see if there is another setTimeout that should use deferredUpdater
 // - Redraw with snapshots.  The imagedata being RGBA 8-bit means
 //   512x512 is a meg of memory down the drain, so we probably don’t
 //   want to save more than about 30 of those snapshots.  (Although
@@ -89,7 +89,6 @@ var aiki =
     , drawing: []
     , penSizes: [ 1, 2, 4, 8, 16, 32, 64, 128 ]
     , redoStack: []
-    , pendingRedraw: null
 
     , setup: function() {
         var cv = $('#c')
@@ -99,6 +98,7 @@ var aiki =
           aiki.deferredUpdater( aiki.updateColorDisplay
                               , 50
                               )
+        aiki.invalidateImage = aiki.deferredUpdater(aiki.redraw, 50)
 
         cv
         .mousedown(aiki.mouseDownHandler)
@@ -252,8 +252,7 @@ var aiki =
 
         var command = aiki.drawing.pop()
         aiki.redoStack.push(command)
-        if (aiki.pendingRedraw) clearTimeout(aiki.pendingRedraw)
-        aiki.pendingRedraw = setTimeout(aiki.redraw, 150)
+        aiki.invalidateImage()
       }
 
     , redo: function() {
@@ -278,7 +277,6 @@ var aiki =
         // Initialize some variables to their initial states.  Can’t
         // change these without changing the interpretation of past
         // drawings.
-        aiki.pendingRedraw = null
         aiki.setOpacity(1.0)
         aiki.setPenSize(1)
 
