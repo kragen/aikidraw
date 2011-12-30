@@ -24,6 +24,14 @@
 //   Maemo and iPhone
 // D add undo/redo buttons
 // - add eyedropper button
+// - turn timer into a regular function instead of an object with one
+//   method
+// - factor out performance measurement logging
+// - rename variables “tt” and “ff”
+// - gray out undo and redo buttons appropriately
+// - inline drawDot
+// - add handling of multiple drawings
+// - make "Save As" link less confusing
 
 var aiki =
     { drawPos: null
