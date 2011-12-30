@@ -21,7 +21,7 @@
 // - rename unclearly-labeled functions. drawWithStroke!?
 // - move brush redrawing above image redrawing to preserve top-down-ness
 // - handle touchmove events so that you can paint on Android
-// - add undo/redo buttons
+// D add undo/redo buttons
 // - add eyedropper button
 
 var aiki =
@@ -51,10 +51,13 @@ var aiki =
           aiki.runAndSave('c' + this.style.backgroundColor)
         })
 
-        $('.switchToSmallerPen').click(aiki.switchToSmallerPen)
-        $('.switchToLargerPen').click(aiki.switchToLargerPen)
-        $('.decreaseOpacity').click(aiki.decreaseOpacity)
-        $('.increaseOpacity').click(aiki.increaseOpacity)
+        ;[ 'switchToSmallerPen'
+        , 'switchToLargerPen'
+        , 'decreaseOpacity'
+        , 'increaseOpacity'
+        , 'undo'
+        , 'redo'
+        ].forEach(function(ss) { $('.'+ss).click(aiki[ss]) })
 
         if (localStorage.currentDrawing) {
           aiki.drawing = JSON.parse(localStorage.currentDrawing)
