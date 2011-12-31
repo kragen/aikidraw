@@ -32,6 +32,12 @@
 // - inline drawDot
 // - add handling of multiple drawings
 // - make "Save As" link less confusing
+// - make "undo" and "redo" do visible things more often
+// - flash brush indicator when things change on it so people notice?
+// - see if .toDataURL() is actually faster in Firefox (?)
+// - allow changing canvas size
+// - change default canvas to 480×480
+
 
 var aiki =
     { drawPos: null
