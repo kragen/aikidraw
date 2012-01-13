@@ -1,8 +1,24 @@
 #!/usr/bin/env node
 // That's right, motherfuckers.  This is the STORAGE SERVER.
+// TODO:
+// D run an HTTP server
+// D store blobs in a list
+// - persist blobs to disk
+// - make Location URLs absolute
+// - assign randomish IDs to blobs?
+// - use alphabetic encoding for blob IDs
+// - add APPEND
+// - support CORS
+// - encode response to prevent protocol confusion and XSS
+// - get rid of stupid fucking mergedicts
+// - rate-limit individual sources by IP address
+// - reorganize code to be more top-down
+// - make Aikidraw store image in storage server
+// - add signaling channels
 
 var http = require('http')
   , querystring = require('querystring')
+  , fs = require('fs')
   , idl = ( '<form method="POST"><textarea name="blob"></textarea>'
           + '<input type="submit" /></form>\n'
           )
@@ -39,6 +55,10 @@ var http = require('http')
       res.end('501')
     }
   , blobs = []
+  , blobfile = fs.openSync('aikidraw.blobs', 'a+')
+  , buffer = new Buffer()
+  , blobstringlen = fs.read(blobfile, buffer, 0, 1024*1024*1024, null)
+
 
 http.createServer(function (req, res) {
   var handler = handlers[req.method]
