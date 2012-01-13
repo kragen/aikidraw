@@ -27,7 +27,7 @@
 // - turn timer into a regular function instead of an object with one
 //   method
 // - factor out performance measurement logging
-// - rename variables “tt” and “ff”
+// D rename variables “tt” and “ff”
 // - gray out undo and redo buttons appropriately
 // - inline drawDot
 // - add handling of multiple drawings
@@ -82,7 +82,7 @@ var aiki =
           aiki.runAndSave('s8')
         }
 
-        aiki.invalidateImage.callback()
+        aiki.invalidateImage.fire()
         aiki.saveDrawing()
       }
 
@@ -170,18 +170,21 @@ var aiki =
                 Math.abs(a.y - b.y))
       }
 
-    , adaptiveUpdater: function(ff) {
-        var timeout = null
+    , adaptiveUpdater: function(callback) {
+        var id = null
           , invoke = function() {
-              if (!timeout) timeout = setTimeout(invoke.callback, invoke.tt)
+              if (!id) id = setTimeout(invoke.fire, invoke.interval)
             }
 
-        invoke.tt = 1
-        invoke.callback = function() {
-          timeout = null
+        invoke.interval = 1
+        invoke.fire = function() {
+          id = null
           var timer = aiki.timer()
-          ff()
-          invoke.tt = Math.max(1, invoke.tt * 0.9, 2 * timer.elapsedMs())
+          callback()
+          invoke.interval = Math.max( 1
+                                    , invoke.interval * 0.9
+                                    , 2 * timer.elapsedMs()
+                                    )
         }
 
         return invoke
